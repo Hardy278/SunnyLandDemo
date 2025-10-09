@@ -2,6 +2,7 @@
 #include "../object/GameObject.hpp"
 #include "../render/Animation.hpp"
 #include "../component/TransformComponent.hpp"
+#include "../component/HealthComponent.hpp"
 #include "../component/SpriteComponent.hpp"
 #include "../component/AnimationComponent.hpp"
 #include "../component/ParallaxComponent.hpp"
@@ -232,6 +233,13 @@ void LevelLoader::loadObjectLayer(const nlohmann::json &layerJson, Scene &scene)
                 auto* ac = gameObject->addComponent<engine::component::AnimationComponent>();
                 // 添加动画到 AnimationComponent
                 addAnimation(animJson, ac, srcSize);
+            }
+
+            // 获取生命值信息并设置
+            auto health = getTileProperty<int>(tileJson, "health");
+            if (health) {
+                // 添加 HealthComponent
+                gameObject->addComponent<engine::component::HealthComponent>(health.value());
             }
 
             // 添加到场景中

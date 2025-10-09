@@ -28,7 +28,7 @@ private:
     std::vector<std::pair<engine::object::GameObject*, engine::component::TileType>> m_tileTriggerEvents;    /// @brief 存储本帧发生的瓦片触发事件 (GameObject*, 触发的瓦片类型, 每次 update 开始时清空)
 
     glm::vec2 m_gravity = {0.0f, 980.0f};        ///< @brief 默认重力值 (像素/秒^2, 相当于100像素对应现实1m)
-    float m_maxSpeed = 500.0f;                  ///< @brief 最大速度 (像素/秒)
+    float m_maxSpeed = 700.0f;                  ///< @brief 最大速度 (像素/秒)
     std::optional<engine::utils::Rect> m_worldBounds;     ///< @brief 世界边界，用于限制物体移动范围
 
 public:

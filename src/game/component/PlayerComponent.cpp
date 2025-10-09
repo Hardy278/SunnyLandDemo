@@ -29,9 +29,10 @@ void PlayerComponent::init() {
     m_physicsComponent = m_owner->getComponent<engine::component::PhysicsComponent>();
     m_spriteComponent = m_owner->getComponent<engine::component::SpriteComponent>();
     m_animationComponent = m_owner->getComponent<engine::component::AnimationComponent>();
+    m_healthComponent = m_owner->getComponent<engine::component::HealthComponent>();
 
     // 检查必要组件是否存在
-    if (!m_transformComponent || !m_physicsComponent || !m_spriteComponent || !m_animationComponent) {
+    if (!m_transformComponent || !m_physicsComponent || !m_spriteComponent || !m_animationComponent || !m_healthComponent) {
         spdlog::error("PLAYERCOMPONENT::init::ERROR::Player 对象缺少必要组件！");
         return;
     }

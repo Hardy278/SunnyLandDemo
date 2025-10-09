@@ -38,11 +38,11 @@ private:
     bool m_isDead = false;
 
     // --- 移动相关参数
-    float m_moveForce = 200.0f;         ///< @brief 水平移动力
-    float m_maxSpeed = 120.0f;          ///< @brief 最大移动速度 (像素/秒)
+    float m_moveForce = 300.0f;         ///< @brief 水平移动力
+    float m_maxSpeed = 160.0f;          ///< @brief 最大移动速度 (像素/秒)
     float m_climbSpeed = 100.0f;        ///< @brief 爬梯子速度 (像素/秒)
-    float m_frictionFactor = 0.85f;     ///< @brief 摩擦系数 (Idle时缓冲效果，每帧乘以此系数)
-    float m_jumpVel = 350.0f;           ///< @brief 跳跃速度 (按下"jump"键给的瞬间向上的速度)
+    float m_frictionFactor = 0.70f;     ///< @brief 摩擦系数 (Idle时缓冲效果，每帧乘以此系数)
+    float m_jumpVel = 320.0f;           ///< @brief 跳跃速度 (按下"jump"键给的瞬间向上的速度)
     // --- 属性相关参数 ---
     float m_stunnedDuration = 0.4f;     ///< @brief 玩家被击中后的硬直时间（单位：秒）
     // 土狼时间(Coyote Time): 允许玩家在离地后短暂时间内仍然可以跳跃
