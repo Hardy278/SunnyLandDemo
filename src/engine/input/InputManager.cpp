@@ -191,7 +191,7 @@ void InputManager::updateActionState(std::string_view actionName, bool isInputAc
     }
 
     if (isInputActive) { // 输入被激活 (按下)
-        if (isInputActive) {
+        if (isRepeatEvent) {
             it->second = ActionState::HELD_DOWN;
         } else {            // 非重复的按下事件
             it->second = ActionState::PRESSED_THIS_FRAME;

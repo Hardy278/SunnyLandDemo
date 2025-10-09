@@ -45,6 +45,9 @@ void PhysicsEngine::update(float deltaTime) {
         if (!pc || !pc->isEnabled()) { // 检查组件是否有效和启用
             continue;
         }
+
+        pc->resetCollisionFlags(); // 重置碰撞标志
+
         // 应用重力 (如果组件受重力影响)：F = g * m
         if (pc->isUseGravity()) {
             pc->addForce(m_gravity * pc->getMass());
@@ -140,7 +143,7 @@ void PhysicsEngine::resolveTileCollisions(engine::component::PhysicsComponent* p
                 // 撞墙了！速度归零，x方向移动到贴着墙的位置
                 newObjPos.x = tileX * layer->getTileSize().x - objSize.x;
                 pc->m_velocity.x = 0.0f;
-                pc->setCollidedRight(true);
+                pc->setCollidedRight(true); // 设置碰撞标志
             } else {
                 // 检测右下角斜坡瓦片
                 auto widthRight = newObjPos.x + objSize.x - tileX * tileSize.x;
@@ -149,7 +152,7 @@ void PhysicsEngine::resolveTileCollisions(engine::component::PhysicsComponent* p
                     // 如果有碰撞（角点的世界y坐标 > 斜坡地面的世界y坐标）, 就让物体贴着斜坡表面
                     if (newObjPos.y > (tileYBottom + 1) * layer->getTileSize().y - objSize.y - heightRight) {
                         newObjPos.y = (tileYBottom + 1) * layer->getTileSize().y - objSize.y - heightRight;
-                        pc->setCollidedBelow(true);
+                        pc->setCollidedBelow(true);    // 设置碰撞标志
                     }
                 }
             }
@@ -167,7 +170,7 @@ void PhysicsEngine::resolveTileCollisions(engine::component::PhysicsComponent* p
                 // 撞墙了！速度归零，x方向移动到贴着墙的位置
                 newObjPos.x = (static_cast<float>(tileX) + 1.0f) * layer->getTileSize().x;
                 pc->m_velocity.x = 0.0f;
-                pc->setCollidedLeft(true);
+                pc->setCollidedLeft(true); // 设置碰撞标志
             } else {
                 // 检测左下角斜坡瓦片
                 auto widthLeft = newObjPos.x - tileX * tileSize.x;
@@ -175,7 +178,7 @@ void PhysicsEngine::resolveTileCollisions(engine::component::PhysicsComponent* p
                 if (heightLeft > 0.0f) {
                     if (newObjPos.y > (tileYBottom + 1) * layer->getTileSize().y - objSize.y - heightLeft) {
                         newObjPos.y = (tileYBottom + 1) * layer->getTileSize().y - objSize.y - heightLeft;
-                        pc->setCollidedBelow(true);
+                        pc->setCollidedBelow(true);    // 设置碰撞标志
                     }
                 }
             }
@@ -196,7 +199,7 @@ void PhysicsEngine::resolveTileCollisions(engine::component::PhysicsComponent* p
                 // 到达地面！速度归零，y方向移动到贴着地面的位置
                 newObjPos.y = tileY * layer->getTileSize().y - objSize.y;
                 pc->m_velocity.y = 0.0f;
-                pc->setCollidedBelow(true);
+                pc->setCollidedBelow(true);    // 设置碰撞标志
             // 如果两个角点都位于梯子上，则判断是不是处在梯子顶层
             } else if (tileTypeLeft == engine::component::TileType::LADDER && tileTypeRight == engine::component::TileType::LADDER) {
                 auto tileTypeUpL = layer->getTileTypeAt({tileX, tileY - 1});       // 检测左角点上方瓦片类型
@@ -223,7 +226,7 @@ void PhysicsEngine::resolveTileCollisions(engine::component::PhysicsComponent* p
                     if (newObjPos.y > (tileY + 1) * layer->getTileSize().y - objSize.y - height) {
                         newObjPos.y = (tileY + 1) * layer->getTileSize().y - objSize.y - height;
                         pc->m_velocity.y = 0.0f;     // 只有向下运动时才需要让 y 速度归零
-                        pc->setCollidedBelow(true);
+                        pc->setCollidedBelow(true);    // 设置碰撞标志
                     }
                 }
             }
@@ -241,7 +244,7 @@ void PhysicsEngine::resolveTileCollisions(engine::component::PhysicsComponent* p
                 // 撞到天花板！速度归零，y方向移动到贴着天花板的位置
                 newObjPos.y = (static_cast<float>(tileY) + 1.0f) * layer->getTileSize().y;
                 pc->m_velocity.y = 0.0f;
-                pc->setCollidedAbove(true);
+                pc->setCollidedAbove(true);    // 设置碰撞标志
             }
         }
     }

@@ -1,7 +1,9 @@
 #include "LevelLoader.hpp"
 #include "../object/GameObject.hpp"
+#include "../render/Animation.hpp"
 #include "../component/TransformComponent.hpp"
 #include "../component/SpriteComponent.hpp"
+#include "../component/AnimationComponent.hpp"
 #include "../component/ParallaxComponent.hpp"
 #include "../component/ColliderComponent.hpp"
 #include "../component/PhysicsComponent.hpp"
@@ -215,10 +217,75 @@ void LevelLoader::loadObjectLayer(const nlohmann::json &layerJson, Scene &scene)
                 }
             }
 
+            // 获取动画信息并设置
+            auto animString = getTileProperty<std::string>(tileJson, "animation");
+            if (animString) {
+                // 解析string为JSON对象
+                nlohmann::json animJson;
+                try {
+                    animJson = nlohmann::json::parse(animString.value());
+                } catch (const nlohmann::json::parse_error& e) {
+                    spdlog::error("解析动画 JSON 字符串失败: {}", e.what());
+                    continue;  // 跳过此对象
+                }
+                // 添加AnimationComponent
+                auto* ac = gameObject->addComponent<engine::component::AnimationComponent>();
+                // 添加动画到 AnimationComponent
+                addAnimation(animJson, ac, srcSize);
+            }
+
             // 添加到场景中
             scene.addGameObject(std::move(gameObject));
             spdlog::info("LEVELLOADER::loadObjectLayer::INFO::加载对象: '{}' 完成", objectName);
         }
+    }
+}
+
+void LevelLoader::addAnimation(const nlohmann::json &animJson, engine::component::AnimationComponent *ac, const glm::vec2 &spriteSize) {
+    // 检查 animJson 必须是一个对象，并且 ac 不能为 nullptr
+    if (!animJson.is_object() || !ac) {
+        spdlog::error("无效的动画 JSON 或 AnimationComponent 指针。");
+        return;
+    }
+    // 遍历动画 JSON 对象中的每个键值对（动画名称 : 动画信息）
+    for (const auto& anim : animJson.items()) {
+        std::string_view animName = anim.key();
+        const auto& animInfo = anim.value();
+        if (!animInfo.is_object()) {
+            spdlog::warn("动画 '{}' 的信息无效或为空。", animName);
+            continue;
+        }
+        // 获取可能存在的动画帧信息
+        auto durationMS = animInfo.value("duration", 100);        // 默认持续时间为100毫秒
+        auto duration = static_cast<float>(durationMS) / 1000.0f;  // 转换为秒
+        auto row = animInfo.value("row", 0);                       // 默认行数为0
+        // 帧信息（数组）是必须存在的
+        if (!animInfo.contains("frames") || !animInfo["frames"].is_array()) {
+            spdlog::warn("动画 '{}' 缺少 'frames' 数组。", animName);
+            continue;
+        }
+        // 创建一个Animation对象 (默认为循环播放)
+        auto animation = std::make_unique<engine::render::Animation>(animName);
+
+        // 遍历数组并进行添加帧信息到animation对象
+        for (const auto& frame : animInfo["frames"]) {
+            if (!frame.is_number_integer()) {
+                spdlog::warn("动画 {} 中 frames 数组格式错误！", animName);
+                continue;;
+            }
+            auto column = frame.get<int>();
+            // 计算源矩形
+            SDL_FRect srcRect = { 
+                column * spriteSize.x, 
+                row * spriteSize.y, 
+                spriteSize.x, 
+                spriteSize.y 
+            };
+            // 添加动画帧到 Animation
+            animation->addFrame(srcRect, duration);
+        }
+        // 将 Animation 对象添加到 AnimationComponent 中
+        ac->addAnimation(std::move(animation));
     }
 }
 

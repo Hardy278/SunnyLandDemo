@@ -31,6 +31,8 @@ set(SOURCES
     src/main.cpp
 
     src/engine/component/Component.cpp
+    src/engine/component/AnimationComponent.cpp
+    src/engine/component/HealthComponent.cpp
     src/engine/component/ParallaxComponent.cpp
     src/engine/component/SpriteComponent.cpp
     src/engine/component/TransformComponent.cpp
@@ -54,6 +56,7 @@ set(SOURCES
     src/engine/render/Renderer.cpp
     src/engine/render/Camera.cpp
     src/engine/render/Sprite.cpp
+    src/engine/render/Animation.cpp
 
     src/engine/resource/ResourceManager.cpp
     src/engine/resource/TextureManager.cpp
@@ -66,6 +69,15 @@ set(SOURCES
     src/engine/utils/Math.cpp
     src/engine/utils/Alignment.cpp
 
+    src/game/component/state/PlayerState.cpp
+    src/game/component/state/ClimbState.cpp
+    src/game/component/state/DeadState.cpp
+    src/game/component/state/FallState.cpp
+    src/game/component/state/HurtState.cpp
+    src/game/component/state/IdleState.cpp
+    src/game/component/state/JumpState.cpp
+    src/game/component/state/WalkState.cpp
+    src/game/component/PlayerComponent.cpp
     src/game/scene/GameScene.cpp
 )
 add_executable(${TARGET} ${SOURCES})

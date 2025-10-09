@@ -16,7 +16,7 @@ Time::Time(int fps) {
     m_startTime = m_endTime;
     m_targrtFPS = fps;
     m_targetFrameTime = 1.0f / fps;
-    m_timeScale = 2.0;
+    m_timeScale = 1.0;
 }
 
 Time::~Time() {
