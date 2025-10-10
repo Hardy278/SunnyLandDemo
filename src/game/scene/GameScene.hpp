@@ -11,7 +11,7 @@ namespace game::scene {
 class GameScene : public engine::scene::Scene {
     engine::object::GameObject* m_player = nullptr;
 public:
-    GameScene(std::string name, engine::core::Context& context, engine::scene::SceneManager& sceneManager);
+    GameScene(std::string_view name, engine::core::Context& context, engine::scene::SceneManager& sceneManager);
 
     void init() override;
     void update(float deltaTime) override;

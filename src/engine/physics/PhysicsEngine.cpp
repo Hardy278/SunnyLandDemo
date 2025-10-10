@@ -405,7 +405,6 @@ void PhysicsEngine::checkTileTriggers() {
             // 遍历触发事件集合，添加到 m_tileTriggerEvents 中
             for (const auto& type : triggersSet) {
                 m_tileTriggerEvents.emplace_back(obj, type);
-                spdlog::trace("PHYSICSENGINE::checkTileTriggers::m_tileTriggerEvents中 添加了 GameObject {} 和瓦片触发类型: {}", obj->getName(), static_cast<int>(type));
             }
         }
     }

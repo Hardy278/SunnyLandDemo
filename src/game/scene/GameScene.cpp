@@ -1,5 +1,9 @@
 #include "GameScene.hpp"
 #include "../component/PlayerComponent.hpp"
+#include "../component/AIComponent.hpp"
+#include "../component/AI/PatrolBehavior.hpp"
+#include "../component/AI/UpdownBehavior.hpp"
+#include "../component/AI/JumpBehavior.hpp"
 #include "../../engine/core/Context.hpp"
 #include "../../engine/object/GameObject.hpp"
 #include "../../engine/component/TransformComponent.hpp"
@@ -12,6 +16,7 @@
 #include "../../engine/physics/PhysicsEngine.hpp"
 #include "../../engine/physics/Collider.hpp"
 #include "../../engine/scene/LevelLoader.hpp"
+#include "../../engine/scene/SceneManager.hpp"
 #include "../../engine/input/InputManager.hpp"
 #include "../../engine/render/Camera.hpp"
 #include "../../engine/render/Animation.hpp"
@@ -21,7 +26,7 @@
 #include <string_view>
 
 namespace game::scene {
-GameScene::GameScene(std::string name, engine::core::Context &context, engine::scene::SceneManager &sceneManager)
+GameScene::GameScene(std::string_view name, engine::core::Context &context, engine::scene::SceneManager &sceneManager)
     : engine::scene::Scene(name, context, sceneManager) {
     spdlog::trace("GAMESCENE::构造完成");
 }
@@ -73,7 +78,8 @@ void GameScene::clean() {
 bool GameScene::initLevel() {
     // 加载关卡（levelLoader通常加载完成后即可销毁，因此不存为成员变量）
     engine::scene::LevelLoader levelLoader;
-    if (!levelLoader.loadLevel("assets/maps/level1.tmj", *this)){
+    auto levelPath = levelNameToPath(m_sceneName);
+    if (!levelLoader.loadLevel(levelPath, *this)){
         spdlog::error("GAMESCENE::initLevel::ERROR::关卡加载失败");
         return false;
     }
@@ -132,36 +138,33 @@ bool GameScene::initPlayer() {
 
 bool GameScene::initEnemyAndItem() {
     bool success = true;
-    for (auto& game_object : m_gameObjects){
-        if (game_object->getName() == "eagle"){
-            if (auto ac = game_object->getComponent<engine::component::AnimationComponent>(); ac){
-                ac->playAnimation("fly");
-            } else {
-                spdlog::error("GAMESCENE::initEnemyAndItem::ERROR::eagle 没有AnimationComponent组件, 无法播放动画");
-                success = false;
+    for (auto& gameObject : m_gameObjects){
+        if (gameObject->getName() == "eagle"){
+            if (auto* AIComponent = gameObject->addComponent<game::component::AIComponent>(); AIComponent){
+                auto yMax = gameObject->getComponent<engine::component::TransformComponent>()->getPosition().y;
+                auto yMin = yMax - 80.0f;    // 让鹰的飞行范围 (当前位置与上方80像素 的区域)
+                AIComponent->setBehavior(std::make_unique<game::component::ai::UpDownBehavior>(yMin, yMax));
             }
         }
-        if (game_object->getName() == "frog"){
-            if (auto ac = game_object->getComponent<engine::component::AnimationComponent>(); ac){
+        if (gameObject->getName() == "frog"){
+            if (auto* AIComponent = gameObject->addComponent<game::component::AIComponent>(); AIComponent){
+                auto xMax = gameObject->getComponent<engine::component::TransformComponent>()->getPosition().x - 10.0f;
+                auto xMin = xMax - 90.0f;    // 青蛙跳跃范围（右侧 - 10.0f 是为了增加稳定性）
+                AIComponent->setBehavior(std::make_unique<game::component::ai::JumpBehavior>(xMin, xMax));
+            }
+        }
+        if (gameObject->getName() == "opossum"){
+            if (auto* AIComponent = gameObject->addComponent<game::component::AIComponent>(); AIComponent){
+                auto xMax = gameObject->getComponent<engine::component::TransformComponent>()->getPosition().x;
+                auto xMin = xMax - 200.0f;    // 负鼠巡逻范围
+                AIComponent->setBehavior(std::make_unique<game::component::ai::PatrolBehavior>(xMin, xMax));
+            }
+        }
+        if (gameObject->getTag() == "item"){
+            if (auto* ac = gameObject->getComponent<engine::component::AnimationComponent>(); ac){
                 ac->playAnimation("idle");
             } else {
-                spdlog::error("GAMESCENE::initEnemyAndItem::ERROR::frog 没有AnimationComponent组件, 无法播放动画");
-                success = false;
-            }
-        }
-        if (game_object->getName() == "opossum"){
-            if (auto ac = game_object->getComponent<engine::component::AnimationComponent>(); ac){
-                ac->playAnimation("walk");
-            } else {
-                spdlog::error("GAMESCENE::initEnemyAndItem::ERROR::opossum 没有AnimationComponent组件, 无法播放动画");
-                success = false;
-            }
-        }
-        if (game_object->getTag() == "item"){
-            if (auto ac = game_object->getComponent<engine::component::AnimationComponent>(); ac){
-                ac->playAnimation("idle");
-            } else {
-                spdlog::error("GAMESCENE::initEnemyAndItem::ERROR::item 没有AnimationComponent组件, 无法播放动画");
+                spdlog::error("Item对象缺少 AnimationComponent, 无法播放动画。");
                 success = false;
             }
         }
@@ -194,6 +197,12 @@ void GameScene::handleObjectCollisions() {
         } else if (obj2->getName() == "player" && obj1->getTag() == "hazard") {
             m_player->getComponent<game::component::PlayerComponent>()->takeDamage(1);
             spdlog::debug("玩家 {} 受到了 HAZARD 对象伤害", obj2->getName());
+        }
+        // 处理玩家与关底触发器碰撞
+        else if (obj1->getName() == "player" && obj2->getTag() == "next_level") {
+            toNextLevel(obj2);
+        } else if (obj2->getName() == "player" && obj1->getTag() == "next_level") {
+            toNextLevel(obj1);
         }
     }
 }
@@ -252,6 +261,12 @@ void GameScene::playerVSItemCollision(engine::object::GameObject*, engine::objec
     item->setNeedRemove(true);  // 标记道具为待删除状态
     auto itemAABB = item->getComponent<engine::component::ColliderComponent>()->getWorldAABB();
     createEffect(itemAABB.position + itemAABB.size / 2.0f, item->getTag());  // 创建特效
+}
+
+void GameScene::toNextLevel(engine::object::GameObject *trigger) {
+    auto sceneName = trigger->getName();
+    auto nextScene = std::make_unique<game::scene::GameScene>(sceneName, m_context, m_sceneManager);
+    m_sceneManager.requestReplaceScene(std::move(nextScene));
 }
 
 void GameScene::createEffect(glm::vec2 centerPos, std::string_view tag) {

@@ -71,17 +71,17 @@ public:
     engine::component::AnimationComponent* getAnimationComponent() const { return m_animationComponent; }
     engine::component::HealthComponent* getHealthComponent() const { return m_healthComponent; }
 
-    void setIsDead(bool isDead) { m_isDead = isDead; }                ///< @brief 设置玩家是否死亡
+    void setIsDead(bool isDead) { m_isDead = isDead; }                  ///< @brief 设置玩家是否死亡
     bool isDead() const { return m_isDead; }                            ///< @brief 获取玩家是否死亡    
-    void setMoveForce(float moveForce) { m_moveForce = moveForce; }   ///< @brief 设置水平移动力
+    void setMoveForce(float moveForce) { m_moveForce = moveForce; }     ///< @brief 设置水平移动力
     float getMoveForce() const { return m_moveForce; }                  ///< @brief 获取水平移动力  
     void setMaxSpeed(float max_speed) { m_maxSpeed = max_speed; }       ///< @brief 设置最大移动速度
     float getMaxSpeed() const { return m_maxSpeed; }                    ///< @brief 获取最大移动速度
     void setClimbSpeed(float climbSpeed) { m_climbSpeed = climbSpeed; } ///< @brief 设置爬梯子速度
-    float getClimbSpeed() const { return m_climbSpeed; }                  ///< @brief 获取爬梯子速度
+    float getClimbSpeed() const { return m_climbSpeed; }                ///< @brief 获取爬梯子速度
     void setFrictionFactor(float frictionFactor) { m_frictionFactor = frictionFactor; }   ///< @brief 设置摩擦系数
     float getFrictionFactor() const { return m_frictionFactor; }        ///< @brief 获取摩擦系数
-    void setJumpVelocity(float jumpVel) { m_jumpVel = jumpVel; }      ///< @brief 设置跳跃速度
+    void setJumpVelocity(float jumpVel) { m_jumpVel = jumpVel; }        ///< @brief 设置跳跃速度
     float getJumpVelocity() const { return m_jumpVel; }                 ///< @brief 获取跳跃速度
     void setStunnedDuration(float duration) { m_stunnedDuration = duration; }  ///< @brief 设置硬直时间
     float getStunnedDuration() const { return m_stunnedDuration; }       ///< @brief 获取硬直时间

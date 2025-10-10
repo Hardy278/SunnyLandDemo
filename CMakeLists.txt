@@ -69,6 +69,11 @@ set(SOURCES
     src/engine/utils/Math.cpp
     src/engine/utils/Alignment.cpp
 
+    src/game/component/AI/AIBehavior.hpp
+    src/game/component/AI/JumpBehavior.cpp
+    src/game/component/AI/PatrolBehavior.cpp
+    src/game/component/AI/UpdownBehavior.cpp
+
     src/game/component/state/PlayerState.cpp
     src/game/component/state/ClimbState.cpp
     src/game/component/state/DeadState.cpp
@@ -77,7 +82,10 @@ set(SOURCES
     src/game/component/state/IdleState.cpp
     src/game/component/state/JumpState.cpp
     src/game/component/state/WalkState.cpp
+
+    src/game/component/AIComponent.cpp
     src/game/component/PlayerComponent.cpp
+
     src/game/scene/GameScene.cpp
 )
 add_executable(${TARGET} ${SOURCES})
