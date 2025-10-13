@@ -7,11 +7,24 @@ namespace engine::object {
     class GameObject;
 }
 
+namespace game::data {
+    class SessionData;
+}
+
+namespace engine::ui {
+    class UILabel;
+    class UIPanel;
+}
+
 namespace game::scene {
 class GameScene : public engine::scene::Scene {
+    std::shared_ptr<game::data::SessionData> m_gameSessionData;    ///< @brief 场景间共享数据，因此用shared_ptr
     engine::object::GameObject* m_player = nullptr;
+
+    engine::ui::UILabel* m_scoreLabel = nullptr;        ///< @brief 得分标签 (生命周期由UIManager管理，因此使用裸指针)
+    engine::ui::UIPanel* m_healthPanel = nullptr;       ///< @brief 生命值图标面板
 public:
-    GameScene(std::string_view name, engine::core::Context& context, engine::scene::SceneManager& sceneManager);
+    GameScene(engine::core::Context& context, engine::scene::SceneManager& sceneManager, std::shared_ptr<game::data::SessionData> data = nullptr);
 
     void init() override;
     void update(float deltaTime) override;

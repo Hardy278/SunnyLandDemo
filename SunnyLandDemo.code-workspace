@@ -85,7 +85,9 @@
 			"any": "cpp",
 			"numeric": "cpp",
 			"valarray": "cpp",
-			"set": "cpp"
+			"set": "cpp",
+			"cstdarg": "cpp",
+			"expected": "cpp"
 		}
 	}
 }

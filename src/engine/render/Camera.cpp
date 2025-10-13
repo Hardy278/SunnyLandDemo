@@ -60,9 +60,9 @@ void Camera::setPosition(const glm::vec2 &position) {
     clampPosition();
 }
 
-void Camera::setLimitBounds(const engine::utils::Rect &bounds) {
-    m_limitBounds = bounds;
-    clampPosition();
+void Camera::setLimitBounds(std::optional<engine::utils::Rect> limitBounds) {
+    m_limitBounds = std::move(limitBounds);
+    clampPosition(); // 设置边界后，立即应用限制
 }
 
 void Camera::setTarget(engine::component::TransformComponent *target) {

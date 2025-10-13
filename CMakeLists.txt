@@ -44,6 +44,7 @@ set(SOURCES
     src/engine/core/Time.cpp
     src/engine/core/Config.cpp
     src/engine/core/Context.cpp
+    src/engine/core/GameState.cpp
 
     src/engine/input/InputManager.cpp
 
@@ -57,6 +58,7 @@ set(SOURCES
     src/engine/render/Camera.cpp
     src/engine/render/Sprite.cpp
     src/engine/render/Animation.cpp
+    src/engine/render/TextRenderer.cpp
 
     src/engine/resource/ResourceManager.cpp
     src/engine/resource/TextureManager.cpp
@@ -65,6 +67,19 @@ set(SOURCES
     src/engine/scene/LevelLoader.cpp
     src/engine/scene/Scene.cpp
     src/engine/scene/SceneManager.cpp
+
+    src/engine/UI/state/UIState.hpp
+    src/engine/UI/state/UIHoverState.cpp
+    src/engine/UI/state/UINormalState.cpp
+    src/engine/UI/state/UIPressedState.cpp
+
+    src/engine/UI/UIButton.cpp
+    src/engine/UI/UIElement.cpp
+    src/engine/UI/UIImage.cpp
+    src/engine/UI/UIInteractive.cpp
+    src/engine/UI/UILabel.cpp
+    src/engine/UI/UIManager.cpp
+    src/engine/UI/UIPanel.cpp
 
     src/engine/utils/Math.cpp
     src/engine/utils/Alignment.cpp
@@ -86,7 +101,13 @@ set(SOURCES
     src/game/component/AIComponent.cpp
     src/game/component/PlayerComponent.cpp
 
+    src/game/data/SessionData.cpp
+
     src/game/scene/GameScene.cpp
+    src/game/scene/TitleScene.cpp
+    src/game/scene/HelpsScene.cpp
+    src/game/scene/MenuScene.cpp
+    src/game/scene/EndScene.cpp
 )
 add_executable(${TARGET} ${SOURCES})
 

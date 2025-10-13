@@ -22,6 +22,10 @@ Scene *SceneManager::getCurrentScene() const {
     return m_sceneStack.back().get(); // 返回栈顶场景的裸指针
 }
 
+engine::core::Context &SceneManager::getContext() const {
+    return m_context;
+}
+
 void SceneManager::update(float deltaTime) {
     // 只更新当前场景
     Scene *currentScene = getCurrentScene();

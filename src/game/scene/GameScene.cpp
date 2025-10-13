@@ -1,10 +1,14 @@
 #include "GameScene.hpp"
+#include "MenuScene.hpp"
+#include "EndScene.hpp"
 #include "../component/PlayerComponent.hpp"
 #include "../component/AIComponent.hpp"
 #include "../component/AI/PatrolBehavior.hpp"
 #include "../component/AI/UpdownBehavior.hpp"
 #include "../component/AI/JumpBehavior.hpp"
+#include "../data/SessionData.hpp"
 #include "../../engine/core/Context.hpp"
+#include "../../engine/core/GameState.hpp"
 #include "../../engine/object/GameObject.hpp"
 #include "../../engine/component/TransformComponent.hpp"
 #include "../../engine/component/TileLayerComponent.hpp"
@@ -20,15 +24,25 @@
 #include "../../engine/input/InputManager.hpp"
 #include "../../engine/render/Camera.hpp"
 #include "../../engine/render/Animation.hpp"
+#include "../../engine/render/TextRenderer.hpp"
+#include "../../engine/UI/UIManager.hpp"
+#include "../../engine/UI/UIPanel.hpp"
+#include "../../engine/UI/UILabel.hpp"
+#include "../../engine/UI/UIImage.hpp"
 #include "../../engine/utils/Math.hpp"
 #include <spdlog/spdlog.h>
 #include <glm/vec2.hpp>
 #include <string_view>
 
 namespace game::scene {
-GameScene::GameScene(std::string_view name, engine::core::Context &context, engine::scene::SceneManager &sceneManager)
-    : engine::scene::Scene(name, context, sceneManager) {
-    spdlog::trace("GAMESCENE::构造完成");
+
+GameScene::GameScene( engine::core::Context& context, engine::scene::SceneManager& scene_manager,std::shared_ptr<game::data::SessionData> data)
+    : Scene("GameScene", context, scene_manager), m_gameSessionData(std::move(data)) {
+    if (!m_gameSessionData) {      // 如果没有传入SessionData，则创建一个默认的
+        m_gameSessionData = std::make_shared<game::data::SessionData>();
+        spdlog::info("未提供 SessionData, 使用默认值。");
+    }
+    spdlog::trace("GameScene 构造完成。");
 }
 
 void GameScene::init() {
@@ -37,6 +51,8 @@ void GameScene::init() {
         return;
     }
     spdlog::trace("GAMESCENE::init::TRACE::GameScene 初始化开始...");
+    m_context.getGameState().setState(engine::core::State::Playing);
+    m_gameSessionData->syncHighScore("assets/save.json");      // 更新最高分
 
     if (!initLevel()) {
         spdlog::error("GAMESCENE::init::ERROR::关卡初始化失败，无法继续。");
@@ -53,6 +69,11 @@ void GameScene::init() {
         m_context.getInputManager().setShouldQuit(true);
         return;
     }
+    if (!initUI()) {
+        spdlog::error("GAMESCENE::init::ERROR::UI初始化失败, 无法继续。");
+        m_context.getInputManager().setShouldQuit(true);
+        return;
+    }
     Scene::init();
     spdlog::trace("GAMESCENE::init::TRACE::GameScene 初始化完成。");
 }
@@ -61,6 +82,17 @@ void GameScene::update(float deltaTime) {
     Scene::update(deltaTime);
     handleObjectCollisions(); // 处理对象碰撞
     handleTileTriggers();    // 处理触发器
+
+    // 玩家掉出地图下方则判断为失败
+    if (m_player ) {
+        auto pos = m_player->getComponent<engine::component::TransformComponent>()->getPosition();
+        auto worldRect = m_context.getPhysicsEngine().getWorldBounds();
+        // 多100像素冗余量
+        if (worldRect && pos.y > worldRect->position.y + worldRect->size.y + 100.0f) {
+            spdlog::debug("玩家掉出地图下方，游戏失败");
+            showEndScene(false);
+        }
+    }
 }
 
 void GameScene::render() {
@@ -69,6 +101,11 @@ void GameScene::render() {
 
 void GameScene::handleInput() {
     Scene::handleInput();
+    // 检查暂停动作
+    if (m_context.getInputManager().isActionPressed("pause")) {
+        spdlog::debug("在GameScene中检测到暂停动作，正在推送MenuScene。");
+        m_sceneManager.requestPushScene(std::make_unique<MenuScene>(m_context, m_sceneManager, m_gameSessionData));
+    }
 }
 
 void GameScene::clean() {
@@ -78,7 +115,7 @@ void GameScene::clean() {
 bool GameScene::initLevel() {
     // 加载关卡（levelLoader通常加载完成后即可销毁，因此不存为成员变量）
     engine::scene::LevelLoader levelLoader;
-    auto levelPath = levelNameToPath(m_sceneName);
+    auto levelPath = m_gameSessionData->getMapPath();
     if (!levelLoader.loadLevel(levelPath, *this)){
         spdlog::error("GAMESCENE::initLevel::ERROR::关卡加载失败");
         return false;
@@ -122,6 +159,15 @@ bool GameScene::initPlayer() {
     auto* playerComponent = m_player->addComponent<game::component::PlayerComponent>();
     if (!playerComponent) {
         spdlog::error("GAMESCENE::initPlayer::ERROR::无法添加 PlayerComponent 到玩家对象");
+        return false;
+    }
+
+    // 从SessionData中更新玩家生命值
+    if (auto healthComponent = m_player->getComponent<engine::component::HealthComponent>(); healthComponent) {
+        healthComponent->setMaxHealth(m_gameSessionData->getMaxHealth());
+        healthComponent->setCurrentHealth(m_gameSessionData->getCurrentHealth());
+    } else {
+        spdlog::error("玩家对象缺少 HealthComponent 组件，无法设置生命值");
         return false;
     }
 
@@ -172,6 +218,13 @@ bool GameScene::initEnemyAndItem() {
     return success;
 }
 
+bool GameScene::initUI() {
+    if (!m_UIManager->init(m_context.getGameState().getLogicalSize())) return false;
+    createScoreUI();
+    createHealthUI();
+    return true;
+}
+
 void GameScene::handleObjectCollisions() {
     // 从物理引擎中获取碰撞对
     auto collisionPairs = m_context.getPhysicsEngine().getCollisionPairs();
@@ -204,6 +257,12 @@ void GameScene::handleObjectCollisions() {
         } else if (obj2->getName() == "player" && obj1->getTag() == "next_level") {
             toNextLevel(obj1);
         }
+        // 处理玩家与结束触发器碰撞
+        else if (obj1->getName() == "player" && obj2->getName() == "win") {
+            showEndScene(true);
+        } else if (obj2->getName() == "player" && obj1->getName() == "win") {
+            showEndScene(true);
+        }
     }
 }
 
@@ -215,12 +274,25 @@ void GameScene::handleTileTriggers() {
         if (tileType == engine::component::TileType::HAZARD) {
             // 玩家碰到到危险瓦片，受伤
             if (obj->getName() == "player") {
-                m_player->getComponent<game::component::PlayerComponent>()->takeDamage(1);
+                handlePlayerDamage(1);
                 spdlog::debug("玩家 {} 受到了 HAZARD 瓦片伤害", obj->getName());
             } 
             // TODO: 其他对象类型的处理，目前让敌人无视瓦片伤害
         }
     }
+}
+
+void GameScene::handlePlayerDamage(int damage) {
+    auto playerComponent = m_player->getComponent<game::component::PlayerComponent>();
+    if (!playerComponent->takeDamage(damage)) { // 没有受伤，直接返回
+        return;
+    }
+    if (playerComponent->isDead()) {
+        spdlog::info("玩家 {} 死亡", m_player->getName());
+        // TODO: 可能的死亡逻辑处理
+    }
+    // 更新生命值及HealthUI
+    updateHealthWithUI();
 }
 
 void GameScene::playerVSEnemyCollision(engine::object::GameObject *player, engine::object::GameObject *enemy) {
@@ -247,16 +319,19 @@ void GameScene::playerVSEnemyCollision(engine::object::GameObject *player, engin
         }
         // 玩家跳起效果
         player->getComponent<engine::component::PhysicsComponent>()->m_velocity.y = -300.0f;  // 向上跳起
+        // 加分
+        addScoreWithUI(1);
     } else {// 踩踏判断失败，玩家受伤
         spdlog::info("GAMESCENE::playerVSEnemyCollision::INFO::敌人 {} 对玩家 {} 造成伤害", enemy->getName(), player->getName());
-        m_player->getComponent<game::component::PlayerComponent>()->takeDamage(1);  // 造成1点伤害
+        handlePlayerDamage(1);  // 造成1点伤害
     }
 }
 
 void GameScene::playerVSItemCollision(engine::object::GameObject*, engine::object::GameObject * item) {
     if (item->getName() == "fruit") {
-        m_player->getComponent<engine::component::HealthComponent>()->heal(1);  // 恢复1点生命值
+        healWithUI(1);        // 加血
     } else if (item->getName() == "gem") {
+        addScoreWithUI(5);    // 加5分
     }
     item->setNeedRemove(true);  // 标记道具为待删除状态
     auto itemAABB = item->getComponent<engine::component::ColliderComponent>()->getWorldAABB();
@@ -265,8 +340,17 @@ void GameScene::playerVSItemCollision(engine::object::GameObject*, engine::objec
 
 void GameScene::toNextLevel(engine::object::GameObject *trigger) {
     auto sceneName = trigger->getName();
-    auto nextScene = std::make_unique<game::scene::GameScene>(sceneName, m_context, m_sceneManager);
+    auto mapPath = levelNameToPath(sceneName);
+    m_gameSessionData->setNextLevel(mapPath);     // 设置下一个关卡信息
+    auto nextScene = std::make_unique<game::scene::GameScene>(m_context, m_sceneManager, m_gameSessionData);
     m_sceneManager.requestReplaceScene(std::move(nextScene));
+}
+
+void GameScene::showEndScene(bool isWin) {
+    spdlog::debug("显示结束场景，游戏 {}", isWin ? "胜利" : "失败");
+    m_gameSessionData->setIsWin(isWin);
+    auto end_scene = std::make_unique<game::scene::EndScene>(m_context, m_sceneManager, m_gameSessionData);
+    m_sceneManager.requestPushScene(std::move(end_scene));
 }
 
 void GameScene::createEffect(glm::vec2 centerPos, std::string_view tag) {
@@ -292,12 +376,85 @@ void GameScene::createEffect(glm::vec2 centerPos, std::string_view tag) {
     }
 
     // --- 根据创建的动画，添加动画组件，并设置为单次播放 ---
-    auto* animation_component = effectObj->addComponent<engine::component::AnimationComponent>();
-    animation_component->addAnimation(std::move(animation));
-    animation_component->setOneShotRemoval(true);
-    animation_component->playAnimation("effect");
+    auto* animationComponent = effectObj->addComponent<engine::component::AnimationComponent>();
+    animationComponent->addAnimation(std::move(animation));
+    animationComponent->setOneShotRemoval(true);
+    animationComponent->playAnimation("effect");
     safeAddGameObject(std::move(effectObj));  // 安全添加特效对象
     spdlog::debug("创建特效: {}", tag);
+}
+
+void GameScene::createScoreUI() {
+    auto scoreText = "Score: " + std::to_string(m_gameSessionData->getCurrentScore());    // 创建得分标签
+    auto scoreLabel = std::make_unique<engine::ui::UILabel>(m_context.getTextRenderer(), scoreText, "assets/fonts/VonwaonBitmap-16px.ttf", 16);
+    m_scoreLabel = scoreLabel.get();           // 成员变量赋值（获取裸指针）
+    auto screenSize = m_UIManager->getRootElement()->getSize();        // 获取屏幕尺寸
+    m_scoreLabel->setPosition(glm::vec2(screenSize.x - 100.0f, 10.0f));
+    m_UIManager->addElement(std::move(scoreLabel));
+}
+
+void GameScene::createHealthUI() {
+    int maxHealth = m_gameSessionData->getMaxHealth();
+    int currentHealth = m_gameSessionData->getCurrentHealth();
+    float startX = 10.0f;
+    float startY = 10.0f;
+    float iconWidth = 20.0f;
+    float iconHeight = 18.0f;
+    float spacing = 5.0f;
+    std::string fullHeartTex = "assets/textures/UI/Heart.png";
+    std::string emptyHeartTex = "assets/textures/UI/Heart-bg.png";
+
+    // 创建一个默认的UIPanel (不需要背景色，因此大小无所谓，只用于定位)
+    auto healthPanel = std::make_unique<engine::ui::UIPanel>();   
+    m_healthPanel = healthPanel.get();           // 成员变量赋值（获取裸指针）
+
+    // --- 根据最大生命值，循环创建生命值图标(添加到UIPanel中) ---
+    for (int i = 0; i < maxHealth; ++i) {          // 创建背景图标
+        glm::vec2 iconPos = {startX + i * (iconWidth + spacing), startY};
+        glm::vec2 iconSize = {iconWidth, iconHeight};
+
+        auto bgIcon = std::make_unique<engine::ui::UIImage>(emptyHeartTex, iconPos, iconSize);
+        m_healthPanel->addChild(std::move(bgIcon));
+    }
+    for (int i = 0; i < maxHealth; ++i) {          // 创建前景图标
+        glm::vec2 iconPos = {startX + i * (iconWidth + spacing), startY};
+        glm::vec2 iconSize = {iconWidth, iconHeight};
+
+        auto fgIcon = std::make_unique<engine::ui::UIImage>(fullHeartTex, iconPos, iconSize);
+        bool isVisible = (i < currentHealth);  // 前景图标的可见性取决于当前生命值
+        fgIcon->setVisible(isVisible);         // 设置前景图标的可见性
+        m_healthPanel->addChild(std::move(fgIcon));
+    }
+    // 将UIPanel添加到UI管理器中
+    m_UIManager->addElement(std::move(healthPanel));
+}
+
+void GameScene::updateHealthWithUI() {
+    if (!m_player || !m_healthPanel) {
+        spdlog::error("玩家对象或 HealthPanel 不存在, 无法更新生命值UI");
+        return;
+    }
+    // 获取当前生命值并更新游戏数据
+    auto currentHealth = m_player->getComponent<engine::component::HealthComponent>()->getCurrentHealth();
+    m_gameSessionData->setCurrentHealth(currentHealth);
+    auto maxHealth = m_gameSessionData->getMaxHealth();
+
+    // 前景图标是后添加的，因此设置后半段的可见性即可
+    for (auto i = maxHealth; i < maxHealth * 2; ++i) {
+        m_healthPanel->getChildren()[i]->setVisible(i - maxHealth < currentHealth);
+    }
+}
+
+void GameScene::addScoreWithUI(int score) {
+    m_gameSessionData->addScore(score);
+    auto scoreText = "Score: " + std::to_string(m_gameSessionData->getCurrentScore());
+    spdlog::info("得分: {}", scoreText);
+    m_scoreLabel->setText(scoreText);
+}
+
+void GameScene::healWithUI(int amount) {
+    m_player->getComponent<engine::component::HealthComponent>()->heal(amount);
+    updateHealthWithUI();                              // 更新生命值与UI
 }
 
 } // namespace game::scene

@@ -7,7 +7,7 @@
 
 namespace engine::input { 
 
-InputManager::InputManager(SDL_Renderer *SDLRenderer, const engine::core::Config *config) {
+InputManager::InputManager(SDL_Renderer *SDLRenderer, const engine::core::Config *config) : m_SDLRenderer(SDLRenderer) {
     initializeMappings(config);  // 初始化输入映射
     // 检查SDL渲染器是否有效
     if (!SDLRenderer) {
@@ -76,7 +76,7 @@ glm::vec2 InputManager::getMousePosition() const {
 glm::vec2 InputManager::getLogicalMousePosition() const {
     glm::vec2 logicalPos;
     // 通过窗口坐标获取渲染坐标（逻辑坐标）
-    SDL_RenderCoordinatesFromWindow(m_SDLrenderer, m_mousePosition.x, m_mousePosition.y, &logicalPos.x, &logicalPos.y);
+    SDL_RenderCoordinatesFromWindow(m_SDLRenderer, m_mousePosition.x, m_mousePosition.y, &logicalPos.x, &logicalPos.y);
     return logicalPos;
 }
 

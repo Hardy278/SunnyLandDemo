@@ -1,5 +1,6 @@
 #pragma once
 #include "Sprite.hpp"
+#include "../utils/Math.hpp"
 
 #include <glm/glm.hpp>
 
@@ -78,6 +79,14 @@ public:
      * 此方法用于绘制UI元素，它们不受相机变换影响，直接显示在屏幕上
      */
     void drawUISprite(const Sprite& sprite, const glm::vec2& position, const std::optional<glm::vec2>& size = std::nullopt);
+    
+    /**
+     * @brief 绘制填充矩形
+     * 
+     * @param rect 矩形区域
+     * @param color 填充颜色
+     */
+    void drawUIFilledRect(const engine::utils::Rect& rect, const engine::utils::FColor& color);
     /// @}
 
 

@@ -1,9 +1,11 @@
 #include "Game.hpp"
 #include "Time.hpp"
 #include "Config.hpp"
+#include "GameState.hpp"
 #include "../resource/ResourceManager.hpp"
 #include "../render/Renderer.hpp"
 #include "../render/Camera.hpp"
+#include "../render/TextRenderer.hpp"
 #include "../input/InputManager.hpp"
 #include "../object/GameObject.hpp"
 #include "../component/SpriteComponent.hpp"
@@ -11,7 +13,7 @@
 #include "../physics/PhysicsEngine.hpp"
 #include "../scene/SceneManager.hpp"
 
-#include "../../game/scene/GameScene.hpp"
+#include "../../game/scene/TitleScene.hpp"
 
 #include <SDL3/SDL.h>
 #include <spdlog/spdlog.h>
@@ -49,21 +51,34 @@ void Game::run() {
     close();
 }
 
+void Game::registerSceneSetup(std::function<void(engine::scene::SceneManager &)> func) {
+    m_sceneSetupFunc = std::move(func);
+    spdlog::trace("已注册场景设置函数。");
+}
+
 bool Game::init() {
     spdlog::trace("GAME::初始化游戏...");
+
+    if (!m_sceneSetupFunc) {
+        spdlog::error("未注册场景设置函数，无法初始化 GameApp。");
+        return false;
+    }
+
     if (!initConfig()) return false;
     if (!initWindow()) return false;
     if (!initTime()) return false;
     if (!initResourceManager()) return false;
     if (!initRenderer()) return false;
     if (!initCamera()) return false;
+    if (!initTextRenderer()) return false;
     if (!initInputManager()) return false;
     if (!initPhysicsEngine()) return false;
+    if (!initGameState()) return false;
+    
     if (!initContext()) return false;
     if (!initSceneManager()) return false;
 
-    auto scene = std::make_unique<game::scene::GameScene>("level1", *m_context, *m_sceneManager);
-    m_sceneManager->requestPushScene(std::move(scene));
+    m_sceneSetupFunc(*m_sceneManager);
     
     m_isRunning = true;
     spdlog::trace("GAME::初始化成功。");
@@ -140,6 +155,9 @@ bool Game::initWindow() {
         return false;
     }
 
+    // 设置渲染器支持透明色
+    SDL_SetRenderDrawBlendMode(m_SDLRenderer, SDL_BLENDMODE_BLEND);
+
     // 设置 VSync (注意: VSync 开启时，驱动程序会尝试将帧率限制到显示器刷新率，有可能会覆盖我们手动设置的 target_fps)
     int vsyncMode = m_config->m_vsyncEnabled ? SDL_RENDERER_VSYNC_ADAPTIVE : SDL_RENDERER_VSYNC_DISABLED;
     SDL_SetRenderVSync(m_SDLRenderer, vsyncMode);
@@ -193,6 +211,16 @@ bool Game::initCamera() {
     return true;
 }
 
+bool Game::initTextRenderer() {
+    try {
+        m_textRenderer = std::make_unique<render::TextRenderer>(m_SDLRenderer, m_resourceManager.get());
+    } catch (const std::exception &e) {
+        spdlog::error("GAME::ERROR::文本渲染器初始化失败: {}", e.what());
+        return false;
+    }
+    return true;
+}
+
 bool Game::initInputManager() {
     try {
         m_inputManager = std::make_unique<engine::input::InputManager>(m_SDLRenderer, m_config.get());
@@ -213,9 +241,27 @@ bool Game::initPhysicsEngine() {
     return true;
 }
 
+bool Game::initGameState() {
+    try {
+        m_gameState = std::make_unique<engine::core::GameState>(m_window, m_SDLRenderer);
+    } catch (const std::exception& e) {
+        spdlog::error("初始化游戏状态失败: {}", e.what());
+        return false;
+    }
+    return true;
+}
+
 bool Game::initContext() {
     try {
-        m_context = std::make_unique<engine::core::Context>(*m_inputManager, *m_renderer, *m_camera, *m_resourceManager, *m_physicsEngine);
+        m_context = std::make_unique<engine::core::Context>(
+            *m_inputManager,
+            *m_renderer, 
+            *m_camera, 
+            *m_textRenderer,
+            *m_resourceManager, 
+            *m_physicsEngine,
+            *m_gameState
+        );
     } catch (const std::exception &e) {
         spdlog::error("GAME::ERROR::上下文初始化失败: {}", e.what());
         return false;

@@ -15,6 +15,7 @@ class InputManager;
 namespace engine::render {
 class Renderer;
 class Camera; 
+class TextRenderer;
 } // namespace engine::render
 
 namespace engine::resource {
@@ -28,6 +29,7 @@ class PhysicsEngine;
 
 
 namespace engine::core {
+    class GameState;
 
 /**
  * @class Context
@@ -44,8 +46,10 @@ private:
     engine::input::InputManager& m_inputManager;          ///< 输入管理器引用
     engine::render::Renderer& m_renderer;                 ///< 渲染器引用
     engine::render::Camera& m_camera;                     ///< 相机引用
+    engine::render::TextRenderer& m_textRenderer;         ///< 文本渲染器引用
     engine::resource::ResourceManager& m_resourceManager; ///< 资源管理器引用
     engine::physics::PhysicsEngine& m_physicsEngine;      ///< 物理引擎引用
+    engine::core::GameState& m_gameState;                   ///< @brief 游戏状态
 
 public:
     /**
@@ -53,15 +57,19 @@ public:
      * @param inputManager 输入管理器引用
      * @param renderer 渲染器引用
      * @param camera 相机引用
+     * @param textRenderer 文本渲染器引用
      * @param resourceManager 资源管理器引用
      * @param physicsEngine 物理引擎引用
+     * @param gameState 游戏状态引用
      */
     Context(
         engine::input::InputManager& inputManager,
         engine::render::Renderer& renderer,
         engine::render::Camera& camera,
+        engine::render::TextRenderer& textRenderer,
         engine::resource::ResourceManager& resourceManager,
-        engine::physics::PhysicsEngine& physicsEngine
+        engine::physics::PhysicsEngine& physicsEngine,
+        engine::core::GameState& gameState
     );
 
     
@@ -76,31 +84,13 @@ public:
 
     /// @name getters
     /// @{
-    /**
-     * @brief 获取输入管理器引用
-     * @return 输入管理器引用
-     */
-    engine::input::InputManager& getInputManager() const;
-    /**
-     * @brief 获取渲染器引用
-     * @return 渲染器引用
-     */
-    engine::render::Renderer& getRenderer() const;
-    /**
-     * @brief 获取相机引用
-     * @return 相机引用
-     */
-    engine::render::Camera& getCamera() const;
-    /**
-     * @brief 获取资源管理器引用
-     * @return 资源管理器引用
-     */
-    engine::resource::ResourceManager& getResourceManager() const;
-    /**
-     * @brief 获取物理引擎引用
-     * @return 物理引擎引用
-     */
-    engine::physics::PhysicsEngine& getPhysicsEngine() const;
+    engine::input::InputManager& getInputManager() const { return m_inputManager; }             ///< @brief 获取输入管理器
+    engine::render::Renderer& getRenderer() const { return m_renderer; }                         ///< @brief 获取渲染器
+    engine::render::Camera& getCamera() const { return m_camera; }                               ///< @brief 获取相机
+    engine::render::TextRenderer& getTextRenderer() const { return m_textRenderer; }            ///< @brief 获取文本渲染器
+    engine::resource::ResourceManager& getResourceManager() const { return m_resourceManager; } ///< @brief 获取资源管理器
+    engine::physics::PhysicsEngine& getPhysicsEngine() const { return m_physicsEngine; }         ///< @brief 获取物理引擎
+    engine::core::GameState& getGameState() const { return m_gameState; }                       ///< @brief 获取游戏状态
     /// @}
 };
 

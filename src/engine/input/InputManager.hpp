@@ -41,7 +41,7 @@ enum class ActionState {
  */
 class InputManager final {
 private:
-    SDL_Renderer* m_SDLrenderer;           ///< @brief 用于获取逻辑坐标的 SDL_Renderer 指针
+    SDL_Renderer* m_SDLRenderer;           ///< @brief 用于获取逻辑坐标的 SDL_Renderer 指针
 
     std::unordered_map<std::string, std::vector<std::string>>                        m_actionsToKeynameMap;  ///< @brief 存储动作名称到按键名称列表的映射
     std::unordered_map<std::variant<SDL_Scancode, Uint32>, std::vector<std::string>> m_inputToActionsMap;    ///< @brief 从输入到关联的动作名称列表

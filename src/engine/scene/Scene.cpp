@@ -1,8 +1,10 @@
 #include "Scene.hpp"
 #include "../object/GameObject.hpp"
 #include "../core/Context.hpp"
+#include "../core/GameState.hpp"
 #include "../render/Camera.hpp"
 #include "../physics/PhysicsEngine.hpp"
+#include "../UI/UIManager.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -11,7 +13,7 @@
 namespace engine::scene {
 
 Scene::Scene(std::string_view name, engine::core::Context &context, engine::scene::SceneManager &sceneManager)
-    : m_sceneName(name), m_context(context), m_sceneManager(sceneManager), m_isInitialized(false) {
+    : m_sceneName(name), m_context(context), m_sceneManager(sceneManager), m_isInitialized(false), m_UIManager(std::make_unique<engine::ui::UIManager>()) {
     spdlog::trace("SCENE::\"{}\"场景构造完成", m_sceneName);
 }
 
@@ -26,10 +28,12 @@ void Scene::init() {
 }
 void Scene::update(float deltaTime) {
     if (!m_isInitialized) return;
-    // 先更新物理引擎
-    m_context.getPhysicsEngine().update(deltaTime);
-    // 更新相机
-    m_context.getCamera().update(deltaTime);
+
+    // 只有游戏进行中，才需要更新物理引擎和相机
+    if (m_context.getGameState().isPlaying()) {
+        m_context.getPhysicsEngine().update(deltaTime);
+        m_context.getCamera().update(deltaTime);
+    }
 
     for (auto it = m_gameObjects.begin(); it != m_gameObjects.end();) {
         if (*it && !(*it)->isNeedRemove()) {
@@ -40,6 +44,7 @@ void Scene::update(float deltaTime) {
             it = m_gameObjects.erase(it);
         }
     }
+    m_UIManager->update(deltaTime, m_context);
     processPendingAdditions();
 }
 void Scene::render() {
@@ -47,9 +52,14 @@ void Scene::render() {
     for (auto &gameObject : m_gameObjects) {
         gameObject->render(m_context);
     }
+    m_UIManager->render(m_context);
 }
+
 void Scene::handleInput() {
     if (!m_isInitialized) return;
+
+    if (m_UIManager->handleInput(m_context)) return; // UIManager处理了输入，则直接返回
+
     for (auto it = m_gameObjects.begin(); it != m_gameObjects.end();) {
         if (*it && !(*it)->isNeedRemove()) {
             (*it)->handleInput(m_context);
@@ -60,6 +70,7 @@ void Scene::handleInput() {
         }
     }
 }
+
 void Scene::clean() {
     if (!m_isInitialized) return;
     for (auto &gameObject : m_gameObjects) {
@@ -101,9 +112,6 @@ void Scene::removeGameObject(engine::object::GameObject *gameObjectPtr) {
 void Scene::safeRemoveGameObject(engine::object::GameObject *gameObjectPtr) {
     gameObjectPtr->setNeedRemove(true);
 }
-const std::vector<std::unique_ptr<engine::object::GameObject>> &Scene::getGameObjects() const {
-    return m_gameObjects;
-}
 engine::object::GameObject *Scene::findGameObjectByName(std::string_view name) const {
     for (auto &gameObject : m_gameObjects) {
         if (gameObject && gameObject->getName() == std::string(name)) {
@@ -111,32 +119,6 @@ engine::object::GameObject *Scene::findGameObjectByName(std::string_view name) c
         }
     }
     return nullptr;
-}
-/// @}
-
-/// @name Getters and Setters
-/// @{
-void Scene::setName(std::string_view name) {
-    m_sceneName = name;
-}
-void Scene::setInitialized(bool initialized) {
-    m_isInitialized = initialized;
-}
-
-bool Scene::isInitialized() const {
-    return m_isInitialized;
-}
-std::string_view Scene::getName() const {
-    return m_sceneName;
-}
-engine::core::Context &Scene::getContext() const {
-    return m_context;
-}
-engine::scene::SceneManager &Scene::getSceneManager() const {
-    return m_sceneManager;
-}
-std::vector<std::unique_ptr<engine::object::GameObject>> &Scene::getGameObjects() {
-    return m_gameObjects;
 }
 /// @}
 

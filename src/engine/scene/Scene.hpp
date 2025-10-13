@@ -1,207 +1,98 @@
-/**
- * @file Scene.h
- * @brief 场景管理系统的核心类定义
- */
 #pragma once
-#include <string>
-#include <string_view>
 #include <vector>
 #include <memory>
+#include <string>
+#include <string_view>
 
 namespace engine::core {
-class Context;
-} // namespace engine::core 
+    class Context;
+}
 
-namespace engine::render {
-class Renderer;
-class Camera;
-} // namespace engine::render
+namespace engine::ui {
+    class UIManager;
+}
 
 namespace engine::object {
-class GameObject;
-} // namespace engine::object
-
-namespace engine::input {
-class InputManager;
-} // namespace engine::input
+    class GameObject;
+}
 
 namespace engine::scene {
-class SceneManager;
+    class SceneManager;
 
 /**
- * @class Scene
- * @brief 场景类，用于管理游戏场景中的所有游戏对象和场景生命周期
- * 
- * Scene 类是游戏场景的基本单位，负责管理场景中的所有游戏对象，
- * 处理场景的初始化、更新、渲染和清理等生命周期事件。
+ * @brief 场景基类，负责管理场景中的游戏对象和场景生命周期。
+ *
+ * 包含一组游戏对象，并提供更新、渲染、处理输入和清理的接口。
+ * 派生类应实现具体的场景逻辑。
  */
 class Scene {
 protected:
-    std::string m_sceneName;                            ///< 场景的唯一标识名称
-    engine::core::Context& m_context;                   ///< 引用引擎的核心上下文，提供全局服务
-    engine::scene::SceneManager& m_sceneManager;        ///< 引用场景管理器，用于场景切换和管理
+    std::string m_sceneName;                            ///< @brief 场景名称
+    engine::core::Context& m_context;                    ///< @brief 上下文引用（隐式，构造时传入）
+    engine::scene::SceneManager& m_sceneManager;        ///< @brief 场景管理器引用（构造时传入）
+    std::unique_ptr<engine::ui::UIManager> m_UIManager; ///< @brief UI管理器(初始化时自动创建)
     
-    bool m_isInitialized;                                ///< 场景初始化状态标志，防止重复初始化
-    std::vector<std::unique_ptr<engine::object::GameObject>> m_gameObjects;         ///< 当前场景中活跃的游戏对象列表
-    std::vector<std::unique_ptr<engine::object::GameObject>> m_pendingAdditions;    ///< 等待添加到场景的游戏对象队列
+    bool m_isInitialized = false;                       ///< @brief 场景是否已初始化(非当前场景很可能未被删除，因此需要初始化标志避免重复初始化)
+    std::vector<std::unique_ptr<engine::object::GameObject>> m_gameObjects;         ///< @brief 场景中的游戏对象
+    std::vector<std::unique_ptr<engine::object::GameObject>> m_pendingAdditions;    ///< @brief 待添加的游戏对象（延时添加）
 
 public:
     /**
-     * @brief 构造函数
-     * @param name 场景名称
-     * @param context 引擎上下文引用
-     * @param sceneManager 场景管理器引用
+     * @brief 构造函数。
+     *
+     * @param name 场景的名称。
+     * @param context 场景上下文。
+     * @param scene_manager 场景管理器。
      */
-    Scene(std::string_view name, engine::core::Context& context, engine::scene::SceneManager& sceneManager);
-    /**
-     * @brief 虚析构函数
-     * 
-     * 声明为虚函数以确保派生类的析构函数能被正确调用。
-     * 实现定义在cpp文件中以避免包含GameObject头文件。
-     */
+    Scene(std::string_view name, engine::core::Context& context, engine::scene::SceneManager& scene_manager);
+
+    // 1. 基类必须声明虚析构函数才能让派生类析构函数被正确调用。
+    // 2. 析构函数定义必须写在cpp中，不然需要引入GameObject头文件
     virtual ~Scene();
 
-    /// @name 禁止拷贝和移动构造
-    /// @{
+    // 禁止拷贝和移动构造
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
     Scene(Scene&&) = delete;
     Scene& operator=(Scene&&) = delete;
-    /// @}
 
+    // 核心循环方法
+    virtual void init();                        ///< @brief 初始化场景。
+    virtual void update(float deltaTime);      ///< @brief 更新场景。
+    virtual void render();                      ///< @brief 渲染场景。
+    virtual void handleInput();                 ///< @brief 处理输入。
+    virtual void clean();                       ///< @brief 清理场景。
 
-    /// @name 生命周期管理
-    /// @{
-    /**
-     * @brief 初始化场景
-     * 
-     * 在场景第一次激活时调用，用于初始化场景资源和游戏对象。
-     * 派生类应该重写此方法以实现特定的初始化逻辑。
-     */
-    virtual void init();
-    /**
-     * @brief 更新场景状态
-     * @param deltaTime 距离上一帧的时间（秒）
-     * 
-     * 每帧调用一次，用于更新场景中所有游戏对象的状态。
-     */
-    virtual void update(float deltaTime);
-    /**
-     * @brief 渲染场景
-     * 
-     * 每帧调用一次，用于渲染场景中的所有可见对象。
-     */
-    virtual void render();
-    /**
-     * @brief 处理输入事件
-     * 
-     * 处理场景相关的用户输入事件。
-     */
-    virtual void handleInput();
-    /**
-     * @brief 清理场景资源
-     * 
-     * 在场景被销毁或切换时调用，用于释放场景资源。
-     */
-    virtual void clean();
-    /// @}
-
-
-    /// @name 游戏对象管理
-    /// @{
-    /**
-     * @brief 直接添加游戏对象到场景
-     * @param game_object 要添加的游戏对象的右值引用
-     * 
-     * 注意：此方法仅在场景初始化时使用是安全的。
-     * 在游戏运行时使用可能导致迭代器失效。
-     */
+    /// @brief 直接向场景中添加一个游戏对象。（初始化时可用，游戏进行中不安全） （&&表示右值引用，与std::move搭配使用，避免拷贝）
     virtual void addGameObject(std::unique_ptr<engine::object::GameObject>&& gameObject);
-    /**
-     * @brief 安全地添加游戏对象到场景
-     * @param game_object 要添加的游戏对象的右值引用
-     * 
-     * 将游戏对象添加到待添加队列中，在下一帧开始前统一处理。
-     * 这是运行时添加游戏对象的推荐方式。
-     */
-    virtual void safeAddGameObject(std::unique_ptr<engine::object::GameObject>&& gameObject);
-    /**
-     * @brief 直接从场景中移除游戏对象
-     * @param game_object_ptr 要移除的游戏对象指针
-     * 
-     * 注意：此方法不安全，可能导致迭代器失效。
-     * 建议使用 safeRemoveGameObject 代替。
-     */
+
+    /// @brief 安全地添加游戏对象。（添加到m_pendingAdditions中）
+    virtual void safeAddGameObject(std::unique_ptr<engine::object::GameObject>&& gameObject); 
+
+    /// @brief 直接从场景中移除一个游戏对象。（一般不使用，但保留实现的逻辑）
     virtual void removeGameObject(engine::object::GameObject* gameObjectPtr);
-    /**
-     * @brief 安全地从场景中移除游戏对象
-     * @param game_object_ptr 要移除的游戏对象指针
-     * 
-     * 标记游戏对象为待移除状态，在适当的时候安全地移除。
-     */
+
+    /// @brief 安全地移除游戏对象。（设置need_remove_标记）
     virtual void safeRemoveGameObject(engine::object::GameObject* gameObjectPtr);
-    /**
-     * @brief 获取场景中的游戏对象容器
-     * @return 游戏对象容器的常量引用
-     */
-    const std::vector<std::unique_ptr<engine::object::GameObject>>& getGameObjects() const;
-    /**
-     * @brief 根据名称查找游戏对象
-     * @param name 要查找的游戏对象名称
-     * @return 找到的第一个匹配的游戏对象指针，未找到返回nullptr
-     */
+
+    /// @brief 获取场景中的游戏对象容器。
+    const std::vector<std::unique_ptr<engine::object::GameObject>>& getGameObjects() const { return m_gameObjects; }
+
+    /// @brief 根据名称查找游戏对象（返回找到的第一个对象）。
     engine::object::GameObject* findGameObjectByName(std::string_view name) const;
-    /// @}
 
+    // getters and setters
+    void setName(std::string_view name) { m_sceneName = name; }               ///< @brief 设置场景名称
+    std::string_view getName() const { return m_sceneName; }                  ///< @brief 获取场景名称
+    void setInitialized(bool initialized) { m_isInitialized = initialized; }    ///< @brief 设置场景是否已初始化
+    bool isInitialized() const { return m_isInitialized; }                      ///< @brief 获取场景是否已初始化
 
-    /// @name Getters and Setters
-    /// @{
-    /**
-     * @brief 设置场景名称
-     * @param name 新的场景名称
-     */
-    void setName(std::string_view name);
-    /**
-     * @brief 设置场景初始化状态
-     * @param initialized 初始化状态
-     */
-    void setInitialized(bool initialized);
-
-    /**
-     * @brief 获取场景初始化状态
-     * @return 如果场景已初始化返回true，否则返回false
-     */
-    bool isInitialized() const;
-    /**
-     * @brief 获取场景名称
-     * @return 场景名称的字符串视图
-     */
-    std::string_view getName() const;
-    /**
-     * @brief 获取引擎上下文引用
-     * @return 引擎上下文引用
-     */
-    engine::core::Context& getContext() const;
-    /**
-     * @brief 获取场景管理器引用
-     * @return 场景管理器引用
-     */
-    engine::scene::SceneManager& getSceneManager() const;
-    /**
-     * @brief 获取场景中的游戏对象容器
-     * @return 游戏对象容器的引用
-     */
-    std::vector<std::unique_ptr<engine::object::GameObject>>& getGameObjects();
-    /// @}
+    engine::core::Context& getContext() const { return m_context; }                  ///< @brief 获取上下文引用
+    engine::scene::SceneManager& getSceneManager() const { return m_sceneManager; } ///< @brief 获取场景管理器引用
+    std::vector<std::unique_ptr<engine::object::GameObject>>& getGameObjects() { return m_gameObjects; } ///< @brief 获取场景中的游戏对象
 
 protected:
-    /**
-     * @brief 处理待添加的游戏对象
-     * 
-     * 将待添加队列中的所有游戏对象添加到场景中。
-     * 通常在每帧更新的最后调用。
-     */
-    void processPendingAdditions();
+    void processPendingAdditions();     ///< @brief 处理待添加的游戏对象。（每轮更新的最后调用）
 };
 
 } // namespace engine::scene

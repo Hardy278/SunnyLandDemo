@@ -123,8 +123,15 @@ void Renderer::drawUISprite(const Sprite &sprite, const glm::vec2 &position, con
         spdlog::error("RENDERER::drawUISprite::ERROR::渲染 UI Sprite 失败: 纹理ID为{} : {}", sprite.getTextureID(), SDL_GetError());
     }
 }
+void Renderer::drawUIFilledRect(const engine::utils::Rect &rect, const engine::utils::FColor &color) {
+    setDrawColorFloat(color.r, color.g, color.b, color.a);
+    SDL_FRect SDLRect = {rect.position.x, rect.position.y, rect.size.x, rect.size.y};
+    if (!SDL_RenderFillRect(m_renderer, &SDLRect)) {
+        spdlog::error("RENDERER::drawUIFilledRect::ERROR::绘制填充矩形失败：{}", SDL_GetError());
+    }
+    setDrawColor(0, 0, 0, 1.0f);
+}
 /// @}
-
 
 /// @name 渲染部分
 /// @{

@@ -85,9 +85,9 @@ public:
     void setPosition(const glm::vec2& position);
     /**
      * @brief 设置相机移动边界
-     * @param bounds 相机移动的矩形边界
+     * @param linitBounds 相机移动的矩形边界
      */
-    void setLimitBounds(const engine::utils::Rect& bounds);
+    void setLimitBounds(std::optional<engine::utils::Rect> limitBounds);   ///< @brief 设置限制相机的移动范围
     ///< @brief 设置跟随目标变换组件
     void setTarget(engine::component::TransformComponent* target);
 
