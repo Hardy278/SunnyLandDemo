@@ -101,41 +101,13 @@ public:
 
     /// @name setter
     /// @{
-    /**
-     * @brief 获取精灵对象
-     * @return 精灵对象的常量引用
-     */
-    const render::Sprite& getSprite() const;
-    /**
-     * @brief 获取精灵尺寸
-     * @return 精灵尺寸的常量引用
-     */
-    const glm::vec2& getSpriteSize() const;
-    /**
-     * @brief 获取精灵偏移量
-     * @return 偏移量的常量引用
-     */
-    const glm::vec2& getOffset() const;
-    /**
-     * @brief 获取对齐方式
-     * @return 当前的对齐方式
-     */
-    utils::Alignment getAlignment();
-    /**
-     * @brief 获取纹理ID
-     * @return 纹理ID的字符串视图
-     */
-    std::string_view getTextureID() const;
-    /**
-     * @brief 检查精灵是否被翻转
-     * @return 如果精灵被水平翻转则返回true，否则返回false
-     */
-    bool isFlipped() const;
-    /**
-     * @brief 检查精灵是否被隐藏
-     * @return 如果精灵被隐藏则返回true，否则返回false
-     */
-    bool isHidden() const;
+    const render::Sprite &getSprite() const { return m_sprite; }
+    const glm::vec2 &getSpriteSize() const { return m_spriteSize; }
+    const glm::vec2 &getOffset() const { return m_offset; }
+    utils::Alignment getAlignment() { return m_alignment; }
+    std::string_view getTextureID() const { return m_sprite.getTextureID(); }
+    bool isFlipped() const { return m_sprite.isFlipped(); }
+    bool isHidden() const { return m_isHidden; }
     /// @}
 
 

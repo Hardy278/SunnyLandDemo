@@ -14,12 +14,12 @@ ParallaxComponent::ParallaxComponent(std::string_view textureID, glm::vec2 scrol
 
 void ParallaxComponent::init() {
     if (!m_owner) {
-        spdlog::error("PARALLAXCOMPONENT::init::ERROR::初始化失败, 没有拥有者");
+        spdlog::error("PARALLAXCOMPONENT::init::初始化失败, 没有拥有者");
         return;
     }
     m_transform = m_owner->getComponent<TransformComponent>();
     if (!m_transform) {
-        spdlog::error("PARALLAXCOMPONENT::init::ERROR::初始化失败, GameObject 没有找到 TransformComponent 组件");
+        spdlog::error("PARALLAXCOMPONENT::init::初始化失败, GameObject 没有找到 TransformComponent 组件");
         return;
     }
 }

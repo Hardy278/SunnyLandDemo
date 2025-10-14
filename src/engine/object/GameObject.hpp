@@ -21,10 +21,11 @@ namespace engine::object {
  */
 class GameObject final {
 private:
-    std::string m_name;        /// @brief 对象名称
-    std::string m_tag;         /// @brief 对象标签
-    bool m_needRemove = false; ///< @brief 延迟删除的标识，将来由场景类负责删除
-    std::unordered_map<std::type_index, std::unique_ptr<engine::component::Component>> m_components; ///< @brief 组件列表
+    bool        m_needRemove = false; ///< @brief 延迟删除的标识，将来由场景类负责删除
+    std::string m_name;               /// @brief 对象名称
+    std::string m_tag;                /// @brief 对象标签
+    
+    std::unordered_map<std::type_index, std::unique_ptr<component::Component>> m_components; ///< @brief 组件列表
 
 public:
     /**
@@ -34,7 +35,6 @@ public:
      */
     GameObject(std::string_view name = "", std::string_view tag = "");
 
-
     /// @name 删除移动拷贝函数
     /// @{ 
     GameObject(const GameObject&) = delete;
@@ -43,32 +43,15 @@ public:
     GameObject& operator=(GameObject&&) = delete;
     /// @}
 
-
     /// @name setter / getter
     /// @{
-    /**
-     * @brief 设置对象名称
-     * @param name 对象名称
-     */
-    void setName(std::string_view name);
-    /**
-     * @brief 设置对象标签
-     * @param tag 对象标签
-     */
-    void setTag(std::string_view tag);
-    /**
-     * @brief 设置是否需要移除
-     * @param need_remove 是否需要移除
-     */
-    void setNeedRemove(bool needRemove);
-    /// @brief 获取对象名称
-    std::string_view getName() const;
-    /// @brief 获取对象标签
-    std::string_view getTag() const;
-    /// @brief 检查是否需要移除
-    bool isNeedRemove() const;
+    void setName(std::string_view name) { m_name = name; }
+    void setTag(std::string_view tag) { m_tag = tag; }
+    void setNeedRemove(bool needRemove) { m_needRemove = needRemove; }
+    std::string_view getName() const { return m_name; }
+    std::string_view getTag() const { return m_tag; }
+    bool isNeedRemove() const { return m_needRemove; }
     /// @}
-
 
     /// @name 组件管理
     /// @{
@@ -144,17 +127,12 @@ public:
     }
     /// @}
 
-
     /// @name 生命周期
     /// @{
-    /// @brief 处理输入
-    void handleInput(engine::core::Context &context);
-    /// @brief 更新游戏对象
-    void update(float deltaTime, engine::core::Context &context);
-    /// @brief 渲染游戏对象
-    void render(engine::core::Context &context);
-    /// @brief 清理游戏对象
-    void clean();
+    void handleInput(engine::core::Context &context);    /// @brief 处理输入
+    void update(float deltaTime, engine::core::Context &context);    /// @brief 更新游戏对象
+    void render(engine::core::Context &context);    /// @brief 渲染游戏对象
+    void clean();    /// @brief 清理游戏对象
     /// @}
 };
 

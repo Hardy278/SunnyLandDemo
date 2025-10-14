@@ -34,42 +34,6 @@ void Time::update() {
     m_endTime = SDL_GetTicksNS(); // 更新结束时间
 }
 
-/// @name setters
-/// @{
-
-void Time::setTargetFPS(int fps) {
-    m_targrtFPS = fps;
-    m_targetFrameTime = 1.0f / fps;
-}
-
-void Time::setTimeScale(double scale) {
-    m_timeScale = scale;
-}
-
-/// @}
-
-
-/// @name getters
-/// @{
-
-double Time::getDeltaTime() const {
-    return m_deltaTime * m_timeScale;
-}
-
-double Time::getUnscaledDeltaTime() const {
-    return m_deltaTime;
-}
-
-double Time::getTimeScale() const {
-    return m_timeScale;
-}
-
-double Time::getFrameTime() const {
-    return m_targetFrameTime;
-}
-
-/// @}
-
 void Time::limitFrameRate(float currentDeltaTime) {
     if (currentDeltaTime < m_targetFrameTime) {
         double timeToWait = m_targetFrameTime - currentDeltaTime;

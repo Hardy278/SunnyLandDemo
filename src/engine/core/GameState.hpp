@@ -27,9 +27,9 @@ enum class State {
  */
 class GameState final {
 private:    
-    SDL_Window* m_window = nullptr;              ///< @brief SDL窗口，用于获取窗口大小
-    SDL_Renderer* m_renderer = nullptr;          ///< @brief SDL渲染器，用于获取逻辑分辨率
-    State m_currentState = State::Title;        ///< @brief 当前游戏状态
+    SDL_Window*   m_window       = nullptr;            ///< @brief SDL窗口，用于获取窗口大小
+    SDL_Renderer* m_renderer     = nullptr;            ///< @brief SDL渲染器，用于获取逻辑分辨率
+    State         m_currentState = State::Title;       ///< @brief 当前游戏状态
 
 public:
     /**

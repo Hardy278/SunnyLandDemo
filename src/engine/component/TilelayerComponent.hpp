@@ -86,19 +86,18 @@ public:
      */
     TileType getTileTypeAt(glm::ivec2 pos) const;
 
-     /**
-      * @brief 根据世界坐标获取瓦片类型
-      * @param worldPos 世界坐标
-      * @return TileType 瓦片类型，如果坐标无效或对应空瓦片则返回 TileType::EMPTY
-      */
+    /**
+     * @brief 根据世界坐标获取瓦片类型
+     * @param worldPos 世界坐标
+     * @return TileType 瓦片类型，如果坐标无效或对应空瓦片则返回 TileType::EMPTY
+     */
     TileType getTileTypeAtWorldPos(const glm::vec2& worldPos) const;
 
-    // getters and setters
+    /// @name getters and setters
+    /// @{
     glm::ivec2 getTileSize() const { return m_tileSize; }               ///< @brief 获取单个瓦片尺寸
     glm::ivec2 getMapSize() const { return m_mapSize; }                 ///< @brief 获取地图尺寸
-    glm::vec2 getWorldSize() const {                                    ///< @brief 获取地图世界尺寸
-        return glm::vec2(m_mapSize.x * m_tileSize.x, m_mapSize.y * m_tileSize.y); 
-    }
+    glm::vec2 getWorldSize() const { return glm::vec2(m_mapSize.x * m_tileSize.x, m_mapSize.y * m_tileSize.y); }
     const std::vector<TileInfo>& getTiles() const { return m_tiles; }    ///< @brief 获取瓦片容器
     const glm::vec2& getOffset() const { return m_offset; }              ///< @brief 获取瓦片层的偏移量
     bool isHidden() const { return m_isHidden; }                        ///< @brief 获取是否隐藏（不渲染）
@@ -106,6 +105,7 @@ public:
     void setOffset(glm::vec2 offset) { m_offset = std::move(offset); }       ///< @brief 设置瓦片层的偏移量
     void setHidden(bool hidden) { m_isHidden = hidden; }                ///< @brief 设置是否隐藏（不渲染）
     void setPhysicsEngine(engine::physics::PhysicsEngine* physicsEngine) {m_physicsEngine = physicsEngine; }
+    /// @}
 
 protected:
     // 核心循环方法

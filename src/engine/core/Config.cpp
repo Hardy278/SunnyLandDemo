@@ -16,22 +16,21 @@ bool Config::loadFromFile(const std::string_view filePath) {
     auto path = std::filesystem::path(filePath);    // 将string_view转换为文件路径 (或std::sring)
     std::ifstream file(path);
     if (!file.is_open()) {
-        spdlog::warn("CONFIG::loadFromFile::ERROR::配置文件 {} 未找到, 使用默认配置创建文件", filePath);
+        spdlog::warn("CONFIG::loadFromFile::配置文件 {} 未找到, 使用默认配置创建文件", filePath);
         if (!saveToFile(filePath)) {
-            spdlog::error("CONFIG::loadFromFile::ERROR::创建配置文件 {} 失败", filePath);
+            spdlog::error("CONFIG::loadFromFile::创建配置文件 {} 失败", filePath);
             return false;
         }
         return false;
     }
-
     try {
         nlohmann::json j;
         file >> j;
         fromJson(j);
-        spdlog::info("CONFIG::loadFromFile::INFO::配置文件 {} 加载成功", filePath);
+        spdlog::info("CONFIG::loadFromFile::配置文件 {} 加载成功", filePath);
         return true;
     } catch (const std::exception &e) {
-        spdlog::error("CONFIG::loadFromFile::ERROR::配置文件 {} 解析失败: {} , 使用默认配置", filePath, e.what());
+        spdlog::error("CONFIG::loadFromFile::配置文件 {} 解析失败: {} , 使用默认配置", filePath, e.what());
     }
     return false;
 }
@@ -40,17 +39,16 @@ bool Config::saveToFile(std::string_view filepath) {
     auto path = std::filesystem::path(filepath);    // 将string_view转换为文件路径
     std::ofstream file(path);
     if (!file.is_open()) {
-        spdlog::error("CONFIG::saveToFile::ERROR::无法打开配置文件 '{}' 进行写入", filepath);
+        spdlog::error("CONFIG::saveToFile::无法打开配置文件 '{}' 进行写入", filepath);
         return false;
     }
-
     try {
         nlohmann::ordered_json j = toJson();
         file << j.dump(4);
         spdlog::info("CONFIG::saveToFile::成功将配置保存到 '{}'", filepath);
         return true;
     } catch (const std::exception& e) {
-        spdlog::error("CONFIG::saveToFile::ERROR::写入配置文件 '{}' 时出错：{}", filepath, e.what());
+        spdlog::error("CONFIG::saveToFile::写入配置文件 '{}' 时出错：{}", filepath, e.what());
     }
     return false;
 }
@@ -71,7 +69,7 @@ void Config::fromJson(const nlohmann::json& j) {
         const auto& perf_config = j["performance"];
         m_targetFPS = perf_config.value("target_fps", m_targetFPS);
         if (m_targetFPS < 0) {
-            spdlog::warn("CONFIG::fromJson::WARN::目标 FPS 不能为负数. 设置为 0 ( 无限制 )");
+            spdlog::warn("CONFIG::fromJson::目标 FPS 不能为负数. 设置为 0 ( 无限制 )");
             m_targetFPS = 0;
         }
     }
@@ -80,7 +78,6 @@ void Config::fromJson(const nlohmann::json& j) {
         m_musicVolume = audio_config.value("music_volume", m_musicVolume);
         m_soundVolume = audio_config.value("sound_volume", m_soundVolume);
     }
-
     // 从 JSON 加载 input_mappings
     if (j.contains("input_mappings") && j["input_mappings"].is_object()) {
         const auto& mappings_json = j["input_mappings"];
@@ -91,7 +88,7 @@ void Config::fromJson(const nlohmann::json& j) {
             m_inputMappings = std::move(input_mappings);
             spdlog::trace("CONFIG::fromJson::成功从配置加载输入映射");
         } catch (const std::exception& e) {
-            spdlog::warn("CONFIG::fromJson::WARN::配置加载警告: 解析 'input_mappings' 时发生异常. 使用默认映射. 错误：{}", e.what());
+            spdlog::warn("CONFIG::fromJson::配置加载警告: 解析 'input_mappings' 时发生异常. 使用默认映射. 错误：{}", e.what());
         }
     } else {
         spdlog::trace("CONFIG::fromJson::配置跟踪: 未找到 'input_mappings' 部分或不是对象. 使用头文件中定义的默认映射");

@@ -22,7 +22,7 @@ void FontManager::SDLFontDeleter::operator()(TTF_Font *font) const {
 
 FontManager::FontManager() {
     if(!TTF_WasInit() && !TTF_Init()) {
-        throw std::runtime_error("RESOURCEMANAGER::FONTMANAGER::ERROR::初始化 SDL_ttf 失败: " + std::string(SDL_GetError()));
+        throw std::runtime_error("RESOURCEMANAGER::FONTMANAGER::初始化 SDL_ttf 失败: " + std::string(SDL_GetError()));
     }
     spdlog::trace("RESOURCEMANAGER::FONTMANAGER::FontManager初始化成功");
 }
@@ -40,7 +40,7 @@ FontManager::~FontManager() {
 /// @{
 TTF_Font *FontManager::loadFont(const std::string_view path, int size) {
     if (size <= 0) {
-        spdlog::error("RESOURCEMANAGER::FONTMANAGER::loadFont::ERROR::无法加载字体\"{}\": 无效的字体大小: {}", path, size);
+        spdlog::error("RESOURCEMANAGER::FONTMANAGER::loadFont::无法加载字体\"{}\": 无效的字体大小: {}", path, size);
         return nullptr;
     }
     FontKey key(std::string(path), size);
@@ -53,7 +53,7 @@ TTF_Font *FontManager::loadFont(const std::string_view path, int size) {
 
     TTF_Font *font = TTF_OpenFont(std::string(path).c_str(), static_cast<float>(size));
     if (!font) {
-        spdlog::error("RESOURCEMANAGER::FONTMANAGER::loadFont::ERROR::无法加载字体\"{}\"({}pt): {}", path, size, SDL_GetError());
+        spdlog::error("RESOURCEMANAGER::FONTMANAGER::loadFont::无法加载字体\"{}\"({}pt): {}", path, size, SDL_GetError());
         return nullptr;
     }
     m_fonts.emplace(key, std::unique_ptr<TTF_Font, SDLFontDeleter>(font));
@@ -67,7 +67,7 @@ TTF_Font *FontManager::getFont(const std::string_view path, int size) {
     if (it != m_fonts.end()) {
         return it->second.get();
     }
-    spdlog::error("RESOURCEMANAGER::FONTMANAGER::getFont::ERROR::字体\"{}\"({}pt)不存在, 尝试加载", path, size);
+    spdlog::error("RESOURCEMANAGER::FONTMANAGER::getFont::字体\"{}\"({}pt)不存在, 尝试加载", path, size);
     return loadFont(path, size);
 }
 

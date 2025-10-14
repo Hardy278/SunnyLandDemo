@@ -9,7 +9,7 @@ namespace engine::ui::state {
 
 void UINormalState::enter() {
     m_owner->setSprite("normal");
-    spdlog::debug("切换到正常状态");
+    spdlog::debug("UINORMALSTATE::切换到正常状态");
 }
 
 std::unique_ptr<UIState> UINormalState::handleInput(engine::core::Context& context) {

@@ -14,9 +14,9 @@ UIImage::UIImage(
     bool isFlipped
 ) : UIElement(std::move(position), std::move(size)), m_sprite(textureID, std::move(sourceRect), isFlipped) {
     if (textureID.empty()) {
-        spdlog::warn("创建了一个空纹理ID的UIImage。");
+        spdlog::warn("UIIMAGE::创建了一个空纹理ID的UIImage。");
     }
-    spdlog::trace("UIImage 构造完成");
+    spdlog::trace("UIIMAGE::UIImage 构造完成");
 }
 
 void UIImage::render(engine::core::Context& context) {

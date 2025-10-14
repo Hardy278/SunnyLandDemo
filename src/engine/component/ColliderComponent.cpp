@@ -12,18 +12,18 @@ ColliderComponent::ColliderComponent(
     bool isTrigger, bool isActive
 ) : m_collider(std::move(collider)), m_alignment(alignment), m_isTrigger(isTrigger), m_isActive(isActive) {
     if (!m_collider) {
-        spdlog::error("COLLIDERCOMPONENT::ERROR::创建 ColliderComponent 时传入了空的碰撞器！");
+        spdlog::error("COLLIDERCOMPONENT::创建 ColliderComponent 时传入了空的碰撞器！");
     }
 }
 
 void ColliderComponent::init() {
     if (!m_owner) {
-        spdlog::error("COLLIDERCOMPONENT::init::ERROR::ColliderComponent 没有所有者 GameObject！");
+        spdlog::error("COLLIDERCOMPONENT::init::ColliderComponent 没有所有者 GameObject！");
         return;
     }
     m_transform = m_owner->getComponent<TransformComponent>();
     if (!m_transform) {
-        spdlog::error("COLLIDERCOMPONENT::init::ERROR::ColliderComponent 需要一个在同一个 GameObject 上的 TransformComponent！");
+        spdlog::error("COLLIDERCOMPONENT::init::ColliderComponent 需要一个在同一个 GameObject 上的 TransformComponent！");
         return;
     }
     // 在获取 m_transform 之后计算初始偏移量

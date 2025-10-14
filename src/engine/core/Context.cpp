@@ -19,6 +19,6 @@ Context::Context(
     engine::core::GameState& gameState
 ) : m_inputManager(inputManager), m_renderer(renderer), m_camera(camera),
     m_textRenderer(textRenderer), m_resourceManager(resourceManager), m_physicsEngine(physicsEngine), m_gameState(gameState) {
-    spdlog::trace("CONTEXT::上下文已创建，包括：输入管理器、渲染器、相机、资源管理器和物理引擎");
+    spdlog::trace("CONTEXT::上下文已创建，包括：输入管理器、渲染器、相机、资源管理器、物理引擎和游戏状态");
 }
 } // namespace engine::core

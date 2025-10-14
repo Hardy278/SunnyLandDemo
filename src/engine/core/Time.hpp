@@ -29,7 +29,6 @@ private:
 public:
     Time();
     Time(int fps);
-
     ~Time();
 
     /// @name 禁用拷贝和移动
@@ -43,44 +42,15 @@ public:
     /// @brief 更新时间
     void update();
 
-
-    /// @name setters
+    /// @name setters / getters
     /// @{
-    /**
-     * @brief 设置目标帧率
-     * @param fps 目标帧率
-     */
-    void setTargetFPS(int fps);
-    /**
-     * @brief 设置时间缩放
-     * @param scale 时间缩放
-     */
-    void setTimeScale(double scale);
-    /// @}
+    void setTargetFPS(int fps) { m_targrtFPS = fps; m_targetFrameTime = 1.0f / fps; }
+    void setTimeScale(double scale) { m_timeScale = scale; }
 
-
-    /// @name getters
-    /// @{
-    /**
-     * @brief 获取时间间隔
-     * @return 时间间隔
-     */
-    double getDeltaTime() const;
-    /**
-     * @brief 获取未缩放的时间间隔
-     * @return 未缩放的时间间隔
-     */
-    double getUnscaledDeltaTime() const;
-    /**
-     * @brief 获取时间缩放
-     * @return 时间缩放
-     */
-    double getTimeScale() const;
-    /**
-     * @brief 获取帧时间
-     * @return 帧时间
-     */
-    double getFrameTime() const;
+    double getDeltaTime() const { return m_deltaTime * m_timeScale; }
+    double getUnscaledDeltaTime() const { return m_deltaTime; }
+    double getTimeScale() const { return m_timeScale; }
+    double getFrameTime() const { return m_targetFrameTime; }
     /// @}
 
 private:
@@ -89,7 +59,6 @@ private:
      * @param currentDeltaTime 当前时间间隔
      */
     void limitFrameRate(float currentDeltaTime);
-    
 };
 
 } // namespace engine::core

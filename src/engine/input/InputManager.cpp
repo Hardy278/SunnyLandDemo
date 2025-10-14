@@ -127,8 +127,8 @@ void InputManager::processEvent(const SDL_Event& event) {
 void InputManager::initializeMappings(const engine::core::Config* config) {
     spdlog::trace("INPUTMANAGER::initializeMappings::初始化输入映射...");
     if (!config) {
-        spdlog::error("INPUTMANAGER::initializeMappings::ERROR::Config 为空指针");
-        throw std::runtime_error("INPUTMANAGER::initializeMappings::ERROR::Config 为空指针");
+        spdlog::error("INPUTMANAGER::initializeMappings::Config 为空指针");
+        throw std::runtime_error("INPUTMANAGER::initializeMappings::Config 为空指针");
     }
     m_actionsToKeynameMap = config->m_inputMappings;      // 获取配置中的输入映射（动作 -> 按键名称）
     m_inputToActionsMap.clear();
@@ -136,11 +136,11 @@ void InputManager::initializeMappings(const engine::core::Config* config) {
 
     // 如果配置中没有定义鼠标按钮动作(通常不需要配置),则添加默认映射, 用于 UI
     if (m_actionsToKeynameMap.find("MouseLeftClick") == m_actionsToKeynameMap.end()) {
-         spdlog::debug("INPUTMANAGER::initializeMappings::DEBUG::配置中没有定义 'MouseLeftClick' 动作,添加默认映射到 'MouseLeft'.");
+         spdlog::debug("INPUTMANAGER::initializeMappings::配置中没有定义 'MouseLeftClick' 动作,添加默认映射到 'MouseLeft'.");
          m_actionsToKeynameMap["MouseLeftClick"] = {"MouseLeft"};     // 如果缺失则添加默认映射
     }
      if (m_actionsToKeynameMap.find("MouseRightClick") == m_actionsToKeynameMap.end()) {
-         spdlog::debug("INPUTMANAGER::initializeMappings::DEBUG::配置中没有定义 'MouseRightClick' 动作,添加默认映射到 'MouseRight'.");
+         spdlog::debug("INPUTMANAGER::initializeMappings::配置中没有定义 'MouseRightClick' 动作,添加默认映射到 'MouseRight'.");
          m_actionsToKeynameMap["MouseRightClick"] = {"MouseRight"};   // 如果缺失则添加默认映射
     }
     // 遍历 动作 -> 按键名称 的映射
@@ -162,7 +162,7 @@ void InputManager::initializeMappings(const engine::core::Config* config) {
                 spdlog::trace("INPUTMANAGER::initializeMappings::  映射鼠标按钮: {} (Button ID: {}) 到动作: {}", keyName, static_cast<int>(mouseButton), actionName);
                 // else if: 未来可添加其它输入类型 ...
             } else {
-                spdlog::warn("INPUTMANAGER::initializeMappings::WARN::输入映射警告: 未知键或按钮名称 '{}' 用于动作 '{}'.", keyName, actionName);
+                spdlog::warn("INPUTMANAGER::initializeMappings::输入映射警告: 未知键或按钮名称 '{}' 用于动作 '{}'.", keyName, actionName);
             }
         }
     }

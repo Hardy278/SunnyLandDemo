@@ -18,7 +18,7 @@ UIButton::UIButton(
 
     // 设置默认状态为"normal"
     setState(std::make_unique<engine::ui::state::UINormalState>(this));
-    spdlog::trace("UIButton 构造完成");
+    spdlog::trace("UIBUTTOM::UIButton 构造完成");
 }
 
 void UIButton::clicked() {

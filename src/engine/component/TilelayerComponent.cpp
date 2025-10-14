@@ -11,7 +11,7 @@ namespace engine::component {
 TileLayerComponent::TileLayerComponent(glm::ivec2 tileSize, glm::ivec2 mapSize, std::vector<TileInfo> &&tiles)
     : m_tileSize(tileSize), m_mapSize(mapSize), m_tiles(std::move(tiles)) {
     if (m_tiles.size() != static_cast<size_t>(m_mapSize.x * m_mapSize.y)) {
-        spdlog::error("TILELAYERCOMPONENT::ERROR::地图尺寸与提供的瓦片向量大小不匹配。瓦片数据将被清除。");
+        spdlog::error("TILELAYERCOMPONENT::地图尺寸与提供的瓦片向量大小不匹配。瓦片数据将被清除。");
         m_tiles.clear();
         m_mapSize = {0, 0};
     }
@@ -20,7 +20,7 @@ TileLayerComponent::TileLayerComponent(glm::ivec2 tileSize, glm::ivec2 mapSize, 
 
 void TileLayerComponent::init() {
     if (!m_owner) {
-        spdlog::warn("TILELAYERCOMPONENT::init::ERROR::TileLayerComponent 的 m_owner 未设置。");
+        spdlog::warn("TILELAYERCOMPONENT::init::TileLayerComponent 的 m_owner 未设置。");
     }
     spdlog::trace("TILELAYERCOMPONENT::init::初始化完成");
 }
@@ -60,7 +60,7 @@ void TileLayerComponent::clean() {
 
 const TileInfo* TileLayerComponent::getTileInfoAt(glm::ivec2 pos) const {
     if (pos.x < 0 || pos.x >= m_mapSize.x || pos.y < 0 || pos.y >= m_mapSize.y) {
-        spdlog::warn("TILELAYERCOMPONENT::getTileInfoAt::WARN::瓦片坐标越界: ({}, {})", pos.x, pos.y);
+        spdlog::warn("TILELAYERCOMPONENT::getTileInfoAt::瓦片坐标越界: ({}, {})", pos.x, pos.y);
         return nullptr;
     }
     size_t index = static_cast<size_t>(pos.y * m_mapSize.x + pos.x);
@@ -68,7 +68,7 @@ const TileInfo* TileLayerComponent::getTileInfoAt(glm::ivec2 pos) const {
     if (index < m_tiles.size()) {
         return &m_tiles[index];
     }
-    spdlog::warn("TILELAYERCOMPONENT::getTileInfoAt::WARN::瓦片索引越界: {}", index);
+    spdlog::warn("TILELAYERCOMPONENT::getTileInfoAt::瓦片索引越界: {}", index);
     return nullptr;
 }
 

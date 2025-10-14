@@ -40,43 +40,17 @@ public:
     TransformComponent& operator=(TransformComponent&&) = delete;
     /// @}
 
-
     /// @name setter / getter
     /// @{
-    /**
-     * @brief 获取对象当前位置
-     * @return const glm::vec2& 返回位置坐标的常量引用
-     */
-    const glm::vec2& getPosition() const;
-    /**
-     * @brief 获取对象当前旋转角度
-     * @return float 返回旋转角度（角度制）
-     */
-    float getRotation() const;
-    /**
-     * @brief 获取对象当前缩放比例
-     * @return const glm::vec2& 返回缩放比例的常量引用
-     */
-    const glm::vec2& getScale() const;
-    /**
-     * @brief 设置对象位置
-     * @param position 新的位置坐标
-     */
-    void setPosition(glm::vec2 position);
-    /**
-     * @brief 设置对象旋转角度
-     * @param rotation 新的旋转角度（角度制）
-     */
-    void setRotation(float rotation);
-    /**
-     * @brief 设置对象缩放比例
-     * @param scale 新的缩放比例
-     * @note 设置缩放时，如果对象有Sprite组件，应该同步更新Sprite的偏移量
-     */
+    const glm::vec2 &getPosition() const { return m_position; }
+    float getRotation() const { return m_rotation; }
+    const glm::vec2 &getScale() const { return m_scale; }
+    void setPosition(glm::vec2 position) { m_position = std::move(position); }
+    void setRotation(float rotation) { m_rotation = rotation; }
     void setScale(glm::vec2 scale);
     /// @}
 
-    
+
     /**
      * @brief 平移对象
      * @param offset 平移的偏移量

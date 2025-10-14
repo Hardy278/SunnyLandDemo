@@ -9,30 +9,6 @@ GameObject::GameObject(std::string_view name, std::string_view tag): m_name(name
     spdlog::info("GAMEOBJECT::GameObject 初始化成功: {} {}", m_name, m_tag);
 }
 
-
-/// @name setter / getter
-/// @{
-void GameObject::setName(std::string_view name) {
-    m_name = name;
-}
-void GameObject::setTag(std::string_view tag) {
-    m_tag = tag;
-}
-void GameObject::setNeedRemove(bool needRemove) {
-    m_needRemove = needRemove;
-}
-std::string_view GameObject::getName() const {
-    return m_name;
-}
-std::string_view GameObject::getTag() const {
-    return m_tag;
-}
-bool GameObject::isNeedRemove() const {
-    return m_needRemove;
-}
-/// @}
-
-
 /// @name 生命周期
 /// @{
 void GameObject::update(float deltaTime, engine::core::Context &context) {

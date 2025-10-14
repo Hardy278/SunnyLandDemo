@@ -15,7 +15,7 @@ UILabel::UILabel(
 ) : UIElement(std::move(position)), m_textRenderer(textRenderer), m_text(text), m_fontID(fontID), m_fontSize(fontSize), m_textFColor(std::move(textColor)) {
     // 获取文本渲染尺寸
     m_size = m_textRenderer.getTextSize(m_text, m_fontID, m_fontSize);
-    spdlog::trace("UILabel 构造完成");
+    spdlog::trace("UILABEL::UILabel 构造完成");
 }
 
 void UILabel::render(engine::core::Context& context) {

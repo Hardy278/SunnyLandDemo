@@ -49,7 +49,7 @@ private:
     engine::render::TextRenderer& m_textRenderer;         ///< 文本渲染器引用
     engine::resource::ResourceManager& m_resourceManager; ///< 资源管理器引用
     engine::physics::PhysicsEngine& m_physicsEngine;      ///< 物理引擎引用
-    engine::core::GameState& m_gameState;                   ///< @brief 游戏状态
+    engine::core::GameState& m_gameState;                 ///< 游戏状态
 
 public:
     /**
@@ -72,7 +72,6 @@ public:
         engine::core::GameState& gameState
     );
 
-    
     /// @name 禁止拷贝和移动
     /// @{
     Context(const Context&) = delete;
@@ -80,7 +79,6 @@ public:
     Context(Context&&) = delete;
     Context& operator=(Context&&) = delete;
     /// @}
-
 
     /// @name getters
     /// @{

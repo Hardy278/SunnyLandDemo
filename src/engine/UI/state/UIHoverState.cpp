@@ -10,7 +10,7 @@ namespace engine::ui::state {
 
 void UIHoverState::enter() {
     m_owner->setSprite("hover");
-    spdlog::debug("切换到悬停状态");
+    spdlog::debug("UIHOVERSTATE::切换到悬停状态");
 }
 
 std::unique_ptr<UIState> UIHoverState::handleInput(engine::core::Context& context) {

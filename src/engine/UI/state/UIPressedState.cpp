@@ -10,7 +10,7 @@ namespace engine::ui::state {
 
 void UIPressedState::enter() {
     m_owner->setSprite("pressed");
-    spdlog::debug("切换到按下状态");
+    spdlog::debug("UIPRESSEDSTATE::切换到按下状态");
 }
 
 std::unique_ptr<UIState> UIPressedState::handleInput(engine::core::Context& context) {

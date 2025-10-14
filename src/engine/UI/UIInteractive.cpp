@@ -11,12 +11,12 @@ UIInteractive::~UIInteractive() = default;
 
 UIInteractive::UIInteractive(engine::core::Context &context, glm::vec2 position, glm::vec2 size)
     : UIElement(std::move(position), std::move(size)), m_context(context) {
-    spdlog::trace("UIInteractive 构造完成");
+    spdlog::trace("UIINTERACTIVE::UIInteractive 构造完成");
 }
 
 void UIInteractive::setState(std::unique_ptr<engine::ui::state::UIState> state) {
     if (!state) {
-        spdlog::warn("尝试设置空的状态！");
+        spdlog::warn("UIINTERACTIVE::setState::尝试设置空的状态！");
         return;
     }
     m_state = std::move(state);

@@ -65,17 +65,18 @@ private:
     /// @brief 游戏场景设置函数，用于在运行游戏前设置初始场景 (GameApp不再决定初始场景是什么)
     std::function<void(engine::scene::SceneManager&)> m_sceneSetupFunc;
 
-    std::unique_ptr<Time>                      m_time = nullptr;             /**< 指向时间管理组件的智能指针 */
-    std::unique_ptr<resource::ResourceManager> m_resourceManager = nullptr;  /**< 指向资源管理组件的智能指针 */
-    std::unique_ptr<render::Renderer>          m_renderer = nullptr;         /**< 指向渲染器组件的智能指针 */
-    std::unique_ptr<render::Camera>            m_camera = nullptr;           /**< 指向相机组件的智能指针 */
-    std::unique_ptr<render::TextRenderer>      m_textRenderer = nullptr;     /**< 指向文本渲染器的智能指针 */
-    std::unique_ptr<Config>                    m_config = nullptr;           /**< 指向配置文件的智能指针 */
-    std::unique_ptr<input::InputManager>       m_inputManager = nullptr;     /**< 指向输入管理组件的智能指针 */
-    std::unique_ptr<Context>                   m_context = nullptr;          /**< 指向游戏上下文的智能指针 */
-    std::unique_ptr<scene::SceneManager>       m_sceneManager = nullptr;     /**< 指向场景管理器的智能指针 */
-    std::unique_ptr<physics::PhysicsEngine>    m_physicsEngine = nullptr;    /**< 指向物理引擎的智能指针 */
-    std::unique_ptr<engine::core::GameState>   m_gameState = nullptr;        /**< 指向游戏状态的智能指针 */
+    std::unique_ptr<Time>                      m_time            = nullptr;   /**< 指向时间管理组件的智能指针 */
+    std::unique_ptr<resource::ResourceManager> m_resourceManager = nullptr;   /**< 指向资源管理组件的智能指针 */
+    std::unique_ptr<render::Renderer>          m_renderer        = nullptr;   /**< 指向渲染器组件的智能指针 */
+    std::unique_ptr<render::Camera>            m_camera          = nullptr;   /**< 指向相机组件的智能指针 */
+    std::unique_ptr<render::TextRenderer>      m_textRenderer    = nullptr;   /**< 指向文本渲染器的智能指针 */
+    std::unique_ptr<Config>                    m_config          = nullptr;   /**< 指向配置文件的智能指针 */
+    std::unique_ptr<input::InputManager>       m_inputManager    = nullptr;   /**< 指向输入管理组件的智能指针 */
+    std::unique_ptr<Context>                   m_context         = nullptr;   /**< 指向游戏上下文的智能指针 */
+    std::unique_ptr<scene::SceneManager>       m_sceneManager    = nullptr;   /**< 指向场景管理器的智能指针 */
+    std::unique_ptr<physics::PhysicsEngine>    m_physicsEngine   = nullptr;   /**< 指向物理引擎的智能指针 */
+    std::unique_ptr<engine::core::GameState>   m_gameState       = nullptr;   /**< 指向游戏状态的智能指针 */
+    /// @}
 
 public:
     Game();
@@ -83,41 +84,30 @@ public:
 
     /// @brief 启动游戏主循环
     void run();
-
     /**
-     * @brief 注册用于设置初始游戏场景的函数。
-     *        这个函数将在 SceneManager 初始化后被调用。
+     * @brief 注册用于设置初始游戏场景的函数。这个函数将在 SceneManager 初始化后被调用。
      * @param func 一个接收 SceneManager 引用的函数对象。
      */
     void registerSceneSetup(std::function<void(engine::scene::SceneManager&)> func);
 
     /// @name 禁用拷贝和移动
     /// @ {
-    Game(const Game &) = delete;            /**< 删除拷贝构造函数 */
-    Game &operator=(const Game &) = delete; /**< 删除拷贝赋值运算符 */
-    Game(Game &&) = delete;                 /**< 删除移动构造函数 */
-    Game &operator=(Game &&) = delete;      /**< 删除移动赋值运算符 */
+    Game(const Game&) = delete;            /**< 删除拷贝构造函数 */
+    Game &operator=(const Game&) = delete; /**< 删除拷贝赋值运算符 */
+    Game(Game&&) = delete;                 /**< 删除移动构造函数 */
+    Game &operator=(Game&&) = delete;      /**< 删除移动赋值运算符 */
     /// @ }
 
 private:
     /// @name 游戏主要函数
     /// @{
-    /**
-     * @brief 初始化SDL窗口和渲染器
-     * @return 成功返回true，失败返回false
-     */
-    [[nodiscard]] bool init();
-    void handleEvents();    /// @brief 处理SDL事件
-    /**
-     * @brief 更新游戏状态
-     * @param deltaTime 上一帧到当前帧的时间间隔（秒）
-     */
-    void update(float deltaTime);
-    void render();    /// @brief 渲染游戏画面
-    void close();    /// @brief 关闭SDL窗口和渲染器，释放资源
+    [[nodiscard]] bool init();      /// @brief 初始化SDL窗口和渲染器
+    void handleEvents();            /// @brief 处理SDL事件
+    void update(float deltaTime);   /// @brief 更新游戏状态
+    void render();                  /// @brief 渲染游戏画面
+    void close();                   /// @brief 关闭SDL窗口和渲染器，释放资源
     /// @}
 
-    
     /// @name 游戏组件管理
     /// @{
     [[nodiscard]] bool initConfig();             /// @brief 初始化配置类

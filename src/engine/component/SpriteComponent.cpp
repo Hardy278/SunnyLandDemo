@@ -19,11 +19,11 @@ SpriteComponent::SpriteComponent(
     bool isFlipped
 ) : m_sprite(textureId, std::move(sourceRectOpt), isFlipped), m_alignment(alignment), m_resourceManager(&resourceManager) {
     if (!m_resourceManager) {
-        spdlog::critical("COMPONENT->SPRITECOMPONENT::CRITICAL::创建 SpriteComponent 时 ResourceManager 为空，此组件将无效");
+        spdlog::critical("SPRITECOMPONENT::创建 SpriteComponent 时 ResourceManager 为空，此组件将无效");
         // 不要在游戏主循环中使用 try...catch / throw，会极大影响性能
     }
     // m_offset 和 m_spriteSize 将在 init 中计算
-    spdlog::trace("COMPONENT->SPRITECOMPONENT::创建 SpriteComponent, 纹理ID: {}", m_sprite.getTextureID());
+    spdlog::trace("SPRITECOMPONENT::创建 SpriteComponent, 纹理ID: {}", m_sprite.getTextureID());
 }
 SpriteComponent::SpriteComponent(
     engine::render::Sprite &&sprite, 
@@ -31,11 +31,11 @@ SpriteComponent::SpriteComponent(
     engine::utils::Alignment alignment
 ) : m_sprite(std::move(sprite)), m_alignment(alignment), m_resourceManager(&resourceManager) {
     if (!m_resourceManager) {
-        spdlog::critical("COMPONENT->SPRITECOMPONENT::CRITICAL::创建 SpriteComponent 时 ResourceManager 为空，此组件将无效");
+        spdlog::critical("SPRITECOMPONENT::创建 SpriteComponent 时 ResourceManager 为空，此组件将无效");
         // 不要在游戏主循环中使用 try...catch / throw，会极大影响性能
     }
     // m_offset 和 m_spriteSize 将在 init 中计算
-    spdlog::trace("COMPONENT->SPRITECOMPONENT::创建 SpriteComponent, 纹理ID: {}", m_sprite.getTextureID());
+    spdlog::trace("SPRITECOMPONENT::创建 SpriteComponent, 纹理ID: {}", m_sprite.getTextureID());
 }
 /// @}
 
@@ -62,33 +62,6 @@ void SpriteComponent::updateOffset() {
         default:                                      break;
     }
 }
-
-
-/// @name setter
-/// @{
-const render::Sprite &SpriteComponent::getSprite() const {
-    return m_sprite;
-}
-const glm::vec2 &SpriteComponent::getSpriteSize() const {
-    return m_spriteSize;
-}
-const glm::vec2 &SpriteComponent::getOffset() const {
-    return m_offset;
-}
-utils::Alignment SpriteComponent::getAlignment() {
-    return m_alignment;
-}
-std::string_view SpriteComponent::getTextureID() const {
-    return m_sprite.getTextureID();
-}
-bool SpriteComponent::isFlipped() const {
-    return m_sprite.isFlipped();
-}
-bool SpriteComponent::isHidden() const {
-    return m_isHidden;
-}
-/// @}
-
 
 /// @name getter
 /// @{
@@ -119,7 +92,7 @@ void SpriteComponent::setAlignment(engine::utils::Alignment anchor) {
 
 void SpriteComponent::updateSpriteSize() {
     if (!m_resourceManager) {
-        spdlog::error("COMPONENT->SPRITECOMPONENT::updateSpriteSize::ERROR::ResourceManager 为空！无法获取纹理尺寸");
+        spdlog::error("SPRITECOMPONENT::updateSpriteSize::ResourceManager 为空！无法获取纹理尺寸");
         return;
     }
     if (m_sprite.getSourceRect().has_value()) {
@@ -136,12 +109,12 @@ void SpriteComponent::updateSpriteSize() {
 /// @{
 void SpriteComponent::init() {
     if (!m_owner) {
-        spdlog::error("COMPONENT->SPRITECOMPONENT::init::ERROR::SpriteComponent 在初始化前未设置所有者。");
+        spdlog::error("SPRITECOMPONENT::init::SpriteComponent 在初始化前未设置所有者。");
         return;
     }
     m_transform = m_owner->getComponent<TransformComponent>();
     if (!m_transform) {
-        spdlog::warn("COMPONENT->SPRITECOMPONENT::init::WARN::GameObject '{}' 上的 SpriteComponent 需要一个 TransformComponent, 但未找到", m_owner->getName());
+        spdlog::warn("SPRITECOMPONENT::init::GameObject '{}' 上的 SpriteComponent 需要一个 TransformComponent, 但未找到", m_owner->getName());
         // Sprite没有Transform无法计算偏移和渲染，直接返回
         return;
     }
@@ -151,16 +124,16 @@ void SpriteComponent::init() {
 }
 void SpriteComponent::render(engine::core::Context &context) {
     if (m_isHidden || !m_transform || !m_resourceManager) {
-        spdlog::error("COMPONENT->SPRITECOMPONENT::render::ERROR::SpriteComponent 在渲染前未设置 owner 或 TransformComponent 或 ResourceManager 为空");
+        spdlog::error("SPRITECOMPONENT::render::SpriteComponent 在渲染前未设置 owner 或 TransformComponent 或 ResourceManager 为空");
         return;
     }
 
     // 获取变换信息（考虑偏移量）
     const glm::vec2& pos = m_transform->getPosition() + m_offset;
     const glm::vec2& scale = m_transform->getScale();
-    float rotation_degrees = m_transform->getRotation();
+    float rotationDegrees = m_transform->getRotation();
 
     // 执行绘制
-    context.getRenderer().drawSprite(context.getCamera(), m_sprite, pos, scale, rotation_degrees);
+    context.getRenderer().drawSprite(context.getCamera(), m_sprite, pos, scale, rotationDegrees);
 }
 }

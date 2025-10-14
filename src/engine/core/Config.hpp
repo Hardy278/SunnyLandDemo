@@ -24,59 +24,20 @@ class Config final {
 public:
     /// @name --- 默认配置值 ---
     /// @{
-    /**
-     * @brief 窗口标题
-     * 
-     * 默认值为"SunnyLand"，用于设置应用程序窗口的标题栏文本。
-     */
     std::string m_windowTitle = "SunnyLand";
-    /**
-     * @brief 窗口宽度
-     * 
-     * 默认值为1280像素，用于设置应用程序窗口的宽度。
-     */
     int m_windowWidth = 1280;
-    /**
-     * @brief 窗口高度
-     * 
-     * 默认值为720像素，用于设置应用程序窗口的高度。
-     */
     int m_windowHeight = 720;
-    /**
-     * @brief 窗口是否可调整大小
-     * 
-     * 默认值为true，允许用户调整应用程序窗口的大小。
-     */
     bool m_windowResizable = true;
-    /**
-     * @brief 是否启用垂直同步
-     * 
-     * 默认值为true，启用垂直同步可以减少屏幕撕裂，但可能会限制帧率。
-     */
+
     bool m_vsyncEnabled = true;
-    /**
-     * @brief 目标帧率
-     * 
-     * 默认值为60，设置应用程序的目标每秒帧数。
-     */
     int m_targetFPS = 60;
-    /**
-     * @brief 背景音乐音量
-     * 
-     * 默认值为1.0f（最大音量），范围从0.0f（静音）到1.0f（最大音量）。
-     */
+    
     float m_musicVolume = 1.0f;
-    /**
-     * @brief 音效音量
-     * 
-     * 默认值为1.0f（最大音量），范围从0.0f（静音）到1.0f（最大音量）。
-     */
     float m_soundVolume = 1.0f;
     /**
      * @brief 键盘绑定映射
      * 
      * 存储操作名称到SDL Scancode名称列表的映射，允许一个操作绑定多个按键。
-     * 
      * 默认包含基本的移动、跳跃、攻击和暂停游戏的按键绑定。
      */
     std::unordered_map<std::string, std::vector<std::string>> m_inputMappings = {

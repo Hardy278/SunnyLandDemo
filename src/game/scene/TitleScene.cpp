@@ -26,10 +26,10 @@ TitleScene::TitleScene(
     std::shared_ptr<game::data::SessionData> sessionData
 ) : engine::scene::Scene("TitleScene", context, sceneManager), m_sessionData(std::move(sessionData)) {
     if (!m_sessionData) {
-        spdlog::warn("TitleScene 接收到空的 SessionData，创建一个默认的 SessionData");
+        spdlog::warn("TITLESCENE::TitleScene 接收到空的 SessionData，创建一个默认的 SessionData");
         m_sessionData = std::make_shared<game::data::SessionData>();
     }
-    spdlog::trace("TitleScene 创建.");
+    spdlog::trace("TITLESCENE::TitleScene 创建.");
 }
 
 // 初始化场景
@@ -40,7 +40,7 @@ void TitleScene::init() {
     // 加载背景地图
     engine::scene::LevelLoader levelLoader;
     if (!levelLoader.loadLevel("assets/maps/level0.tmj", *this)) {
-         spdlog::error("加载背景失败");
+         spdlog::error("TITLESCENE::init::加载背景失败");
          return;
     }
     m_sessionData->syncHighScore("assets/save.json");      // 更新最高分
@@ -53,17 +53,17 @@ void TitleScene::init() {
     createUI();
 
     Scene::init();
-    spdlog::trace("TitleScene 初始化完成.");
+    spdlog::trace("TITLESCENE::init::TitleScene 初始化完成.");
 }
 
 // 创建 UI 界面元素
 void TitleScene::createUI() {
-    spdlog::trace("创建 TitleScene UI...");
+    spdlog::trace("TITLESCENE::createUI::创建 TitleScene UI...");
     m_context.getGameState().setState(engine::core::State::Title);
     auto windowSize = m_context.getGameState().getLogicalSize();
 
     if (!m_UIManager->init(windowSize)) {
-        spdlog::error("初始化 UIManager 失败!");
+        spdlog::error("TITLESCENE::createUI::初始化 UIManager 失败!");
         return;
     }
 
@@ -165,7 +165,7 @@ void TitleScene::createUI() {
     creditsLabel->setPosition(glm::vec2{(windowSize.x - creditsLabel->getSize().x) / 2.0f, windowSize.y - creditsLabel->getSize().y - 10.0f});
     m_UIManager->addElement(std::move(creditsLabel));
 
-    spdlog::trace("TitleScene UI 创建完成.");
+    spdlog::trace("TITLESCENE::createUI::TitleScene UI 创建完成.");
 }
 
 // 更新场景逻辑
@@ -178,7 +178,7 @@ void TitleScene::update(float deltaTime) {
 // --- 按钮回调实现 --- //
 
 void TitleScene::onStartGameClick() {
-    spdlog::debug("开始游戏按钮被点击。");
+    spdlog::debug("TITLESCENE::onStartGameClick::开始游戏按钮被点击。");
     if (m_sessionData) {
         m_sessionData->reset();
     }
@@ -186,26 +186,26 @@ void TitleScene::onStartGameClick() {
 }
 
 void TitleScene::onLoadGameClick() {
-    spdlog::debug("加载游戏按钮被点击。");
+    spdlog::debug("TITLESCENE::onLoadGameClick::加载游戏按钮被点击。");
     if (!m_sessionData) {
-        spdlog::error("游戏状态为空，无法加载。");
+        spdlog::error("TITLESCENE::onLoadGameClick::游戏状态为空，无法加载。");
         return;
     }
     if (m_sessionData->loadFromFile("assets/save.json")) {
-        spdlog::debug("保存文件加载成功。开始游戏...");
+        spdlog::debug("TITLESCENE::onLoadGameClick::保存文件加载成功。开始游戏...");
         m_sceneManager.requestReplaceScene(std::make_unique<GameScene>(m_context, m_sceneManager, m_sessionData));
     } else {
-        spdlog::warn("加载保存文件失败。");
+        spdlog::warn("TITLESCENE::onLoadGameClick::加载保存文件失败。");
     }
 }
 
 void TitleScene::onHelpsClick() {
-    spdlog::debug("帮助按钮被点击。");
+    spdlog::debug("TITLESCENE::onHelpsClick::帮助按钮被点击。");
     m_sceneManager.requestPushScene(std::make_unique<HelpsScene>(m_context, m_sceneManager));
 }
 
 void TitleScene::onQuitClick() {
-    spdlog::debug("退出按钮被点击。");
+    spdlog::debug("TITLESCENE::onQuitClick::退出按钮被点击。");
     m_sessionData->syncHighScore("assets/save.json");   // 退出前先同步最高分
     m_context.getInputManager().setShouldQuit(true);
 }
