@@ -1,6 +1,7 @@
 #include "GameScene.hpp"
 #include "MenuScene.hpp"
 #include "EndScene.hpp"
+#include "../object/ObjectBuilderSL.hpp"
 #include "../component/PlayerComponent.hpp"
 #include "../component/AIComponent.hpp"
 #include "../component/AI/PatrolBehavior.hpp"
@@ -55,27 +56,22 @@ void GameScene::init() {
     m_gameSessionData->syncHighScore("assets/save.json");      // 更新最高分
 
     if (!initLevel()) {
-        spdlog::error("GAMESCENE::init::ERROR::关卡初始化失败，无法继续。");
+        spdlog::error("GAMESCENE::init::ERROR::关卡初始化失败，无法继续");
         m_context.getInputManager().setShouldQuit(true);
         return;
     }
     if (!initPlayer()) {
-        spdlog::error("GAMESCENE::init::ERROR::玩家初始化失败，无法继续。");
-        m_context.getInputManager().setShouldQuit(true);
-        return;
-    }
-    if (!initEnemyAndItem()) {
-        spdlog::error("GAMESCENE::init::ERROR::敌人及道具初始化失败，无法继续。");
+        spdlog::error("GAMESCENE::init::ERROR::玩家初始化失败，无法继续");
         m_context.getInputManager().setShouldQuit(true);
         return;
     }
     if (!initUI()) {
-        spdlog::error("GAMESCENE::init::ERROR::UI初始化失败, 无法继续。");
+        spdlog::error("GAMESCENE::init::ERROR::UI初始化失败, 无法继续");
         m_context.getInputManager().setShouldQuit(true);
         return;
     }
     Scene::init();
-    spdlog::trace("GAMESCENE::init::TRACE::GameScene 初始化完成。");
+    spdlog::trace("GAMESCENE::init::TRACE::GameScene 初始化完成");
 }
 
 void GameScene::update(float deltaTime) {
@@ -84,7 +80,7 @@ void GameScene::update(float deltaTime) {
     handleTileTriggers();    // 处理触发器
 
     // 玩家掉出地图下方则判断为失败
-    if (m_player ) {
+    if (m_player) {
         auto pos = m_player->getComponent<engine::component::TransformComponent>()->getPosition();
         auto worldRect = m_context.getPhysicsEngine().getWorldBounds();
         // 多100像素冗余量
@@ -114,7 +110,11 @@ void GameScene::clean() {
 
 bool GameScene::initLevel() {
     // 加载关卡（levelLoader通常加载完成后即可销毁，因此不存为成员变量）
-    engine::scene::LevelLoader levelLoader;
+    engine::scene::LevelLoader levelLoader(m_context);
+    auto builder = std::make_unique<game::object::ObjectBuilderSL>(levelLoader, m_context);
+    levelLoader.setObjectBuilder(std::move(builder));
+
+    // 加载关卡
     auto levelPath = m_gameSessionData->getMapPath();
     if (!levelLoader.loadLevel(levelPath, *this)){
         spdlog::error("GAMESCENE::initLevel::ERROR::关卡加载失败");
@@ -155,13 +155,6 @@ bool GameScene::initPlayer() {
         return false;
     }
 
-    // 添加PlayerComponent到玩家对象
-    auto* playerComponent = m_player->addComponent<game::component::PlayerComponent>();
-    if (!playerComponent) {
-        spdlog::error("GAMESCENE::initPlayer::ERROR::无法添加 PlayerComponent 到玩家对象");
-        return false;
-    }
-
     // 从SessionData中更新玩家生命值
     if (auto healthComponent = m_player->getComponent<engine::component::HealthComponent>(); healthComponent) {
         healthComponent->setMaxHealth(m_gameSessionData->getMaxHealth());
@@ -170,52 +163,6 @@ bool GameScene::initPlayer() {
         spdlog::error("玩家对象缺少 HealthComponent 组件，无法设置生命值");
         return false;
     }
-
-    // 相机跟随玩家
-    auto* m_playertransform = m_player->getComponent<engine::component::TransformComponent>();
-    if (!m_playertransform) {
-        spdlog::error("GAMESCENE::initPlayer::ERROR::玩家对象没有 TransformComponent 组件, 无法设置相机目标");
-        return false;
-    }
-    m_context.getCamera().setTarget(m_playertransform);
-    spdlog::trace("GAMESCENE::initPlayer::TRACE::Player初始化完成。");
-    return true;
-}
-
-bool GameScene::initEnemyAndItem() {
-    bool success = true;
-    for (auto& gameObject : m_gameObjects){
-        if (gameObject->getName() == "eagle"){
-            if (auto* AIComponent = gameObject->addComponent<game::component::AIComponent>(); AIComponent){
-                auto yMax = gameObject->getComponent<engine::component::TransformComponent>()->getPosition().y;
-                auto yMin = yMax - 80.0f;    // 让鹰的飞行范围 (当前位置与上方80像素 的区域)
-                AIComponent->setBehavior(std::make_unique<game::component::ai::UpDownBehavior>(yMin, yMax));
-            }
-        }
-        if (gameObject->getName() == "frog"){
-            if (auto* AIComponent = gameObject->addComponent<game::component::AIComponent>(); AIComponent){
-                auto xMax = gameObject->getComponent<engine::component::TransformComponent>()->getPosition().x - 10.0f;
-                auto xMin = xMax - 90.0f;    // 青蛙跳跃范围（右侧 - 10.0f 是为了增加稳定性）
-                AIComponent->setBehavior(std::make_unique<game::component::ai::JumpBehavior>(xMin, xMax));
-            }
-        }
-        if (gameObject->getName() == "opossum"){
-            if (auto* AIComponent = gameObject->addComponent<game::component::AIComponent>(); AIComponent){
-                auto xMax = gameObject->getComponent<engine::component::TransformComponent>()->getPosition().x;
-                auto xMin = xMax - 200.0f;    // 负鼠巡逻范围
-                AIComponent->setBehavior(std::make_unique<game::component::ai::PatrolBehavior>(xMin, xMax));
-            }
-        }
-        if (gameObject->getTag() == "item"){
-            if (auto* ac = gameObject->getComponent<engine::component::AnimationComponent>(); ac){
-                ac->playAnimation("idle");
-            } else {
-                spdlog::error("Item对象缺少 AnimationComponent, 无法播放动画。");
-                success = false;
-            }
-        }
-    }
-    return success;
 }
 
 bool GameScene::initUI() {

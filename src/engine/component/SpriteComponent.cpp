@@ -26,7 +26,7 @@ SpriteComponent::SpriteComponent(
     spdlog::trace("SPRITECOMPONENT::创建 SpriteComponent, 纹理ID: {}", m_sprite.getTextureID());
 }
 SpriteComponent::SpriteComponent(
-    engine::render::Sprite &&sprite, 
+    engine::render::Sprite sprite, 
     engine::resource::ResourceManager &resourceManager, 
     engine::utils::Alignment alignment
 ) : m_sprite(std::move(sprite)), m_alignment(alignment), m_resourceManager(&resourceManager) {

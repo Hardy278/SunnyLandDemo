@@ -74,7 +74,7 @@ public:
      * @param alignment 精灵对齐方式，默认为NONE
      */
     SpriteComponent(
-        engine::render::Sprite&& sprite,
+        engine::render::Sprite sprite,
         engine::resource::ResourceManager& resourceManager,
         engine::utils::Alignment alignment = engine::utils::Alignment::NONE
     );

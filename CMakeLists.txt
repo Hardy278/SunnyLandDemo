@@ -49,6 +49,7 @@ set(SOURCES
     src/engine/input/InputManager.cpp
 
     src/engine/object/GameObject.cpp
+    src/engine/object/ObjectBuilder.cpp
 
     src/engine/physics/Collider.hpp
     src/engine/physics/Collision.cpp
@@ -102,6 +103,8 @@ set(SOURCES
     src/game/component/PlayerComponent.cpp
 
     src/game/data/SessionData.cpp
+
+    src/game/object/ObjectBuilderSL.cpp
 
     src/game/scene/GameScene.cpp
     src/game/scene/TitleScene.cpp

@@ -1,17 +1,25 @@
 #pragma once
 #include <string>
 #include <string_view>
-#include <glm/vec2.hpp>
+#include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 #include <map>
 #include <optional>
 #include "../utils/Math.hpp"
 
 namespace engine::component {
-class AnimationComponent;
-class AudioComponent;
-struct TileInfo;
-enum class TileType;
+    class AnimationComponent;
+    class AudioComponent;
+    struct TileInfo;
+    enum class TileType;
+}
+
+namespace engine::object {
+    class ObjectBuilder;
+}
+
+namespace engine::core {
+    class Context;
 }
 
 namespace engine::scene {
@@ -21,13 +29,19 @@ class Scene;
  * @brief 负责从 Tiled JSON 文件 (.tmj) 加载关卡数据到 Scene 中。
  */
 class LevelLoader final {
+    friend class engine::object::ObjectBuilder;
+private:
     std::string m_mapPath;      ///< @brief 地图路径（拼接路径时需要）
     glm::ivec2  m_mapSize;       ///< @brief 地图尺寸(瓦片数量)
     glm::ivec2  m_tileSize;      ///< @brief 瓦片尺寸(像素)
     std::map<int, nlohmann::json> m_tilesetData;    ///< @brief firstgid -> 瓦片集数据
+    std::unique_ptr<engine::object::ObjectBuilder> m_objectBuilder;    ///< @brief 对象构建器
 
 public:
-    LevelLoader() = default;
+    LevelLoader(engine::core::Context& context);
+    ~LevelLoader();
+    
+    void setObjectBuilder(std::unique_ptr<engine::object::ObjectBuilder> objectBuilder);
 
     /**
      * @brief 加载关卡数据到指定的 Scene 对象中。
