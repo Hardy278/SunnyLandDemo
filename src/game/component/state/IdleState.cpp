@@ -19,30 +19,6 @@ void IdleState::enter() {
 void IdleState::exit() {
 }
 
-std::unique_ptr<PlayerState> IdleState::handleInput(engine::core::Context& context) {
-    auto inputManager = context.getInputManager();
-    auto physicsComponent = m_playerComponent->getPhysicsComponent();
-    // 如果按"move_up"键，且与梯子重合，则切换到 ClimbState
-    if (physicsComponent->hasCollidedLadder() && inputManager.isActionDown("move_up")) {
-        return std::make_unique<ClimbState>(m_playerComponent);
-    }
-    // 如果按下“move_down”且在梯子顶层，则切换到 ClimbState
-    if (physicsComponent->isOnTopLadder() && inputManager.isActionDown("move_down")) {
-        // 需要向下移动一点，确保下一帧能与梯子碰撞（否则会切换回FallState）
-        m_playerComponent->getTransformComponent()->translate(glm::vec2(0, 2.0f));
-        return std::make_unique<ClimbState>(m_playerComponent);
-    }
-    // 如果按下了左右移动键，则切换到 WalkState
-    if (inputManager.isActionDown("move_left") || inputManager.isActionDown("move_right")) {
-        return std::make_unique<WalkState>(m_playerComponent);
-    }
-    // 如果按下“jump”则切换到 JumpState
-    if (inputManager.isActionPressed("jump")) {
-        return std::make_unique<JumpState>(m_playerComponent);
-    }
-    return nullptr;
-}
-
 std::unique_ptr<PlayerState> IdleState::update(float, engine::core::Context&) {
     // 应用摩擦力(水平方向)
     auto physicsComponent = m_playerComponent->getPhysicsComponent();
@@ -52,6 +28,44 @@ std::unique_ptr<PlayerState> IdleState::update(float, engine::core::Context&) {
     if (!m_playerComponent->isOnGround()) {
         return std::make_unique<FallState>(m_playerComponent);
     }
+    return nullptr;
+}
+
+
+std::unique_ptr<PlayerState> IdleState::moveLeft() {
+    // 切换到 WalkState
+    return std::make_unique<WalkState>(m_playerComponent);
+}
+
+std::unique_ptr<PlayerState> IdleState::moveRight() {
+    // 切换到 WalkState
+    return std::make_unique<WalkState>(m_playerComponent);
+}
+
+std::unique_ptr<PlayerState> IdleState::jump() {
+    // 切换到 JumpState
+    return std::make_unique<JumpState>(m_playerComponent);
+}
+
+std::unique_ptr<PlayerState> IdleState::climbUp() {
+    auto physics_component = m_playerComponent->getPhysicsComponent();
+    // 如果与梯子重合，则切换到 ClimbState
+    if (physics_component->hasCollidedLadder()) {
+        return std::make_unique<ClimbState>(m_playerComponent);
+    }
+
+    return nullptr;
+}
+
+std::unique_ptr<PlayerState> IdleState::climbDown() {
+    auto physics_component = m_playerComponent->getPhysicsComponent();
+    // 如果已经在梯子顶层，则切换到 ClimbState
+    if (physics_component->isOnTopLadder()) {
+        // 需要向下移动一点，确保下一帧能与梯子碰撞（否则会切换回FallState）
+        m_playerComponent->getTransformComponent()->translate(glm::vec2(0, 2.0f));
+        return std::make_unique<ClimbState>(m_playerComponent);
+    }
+
     return nullptr;
 }
 

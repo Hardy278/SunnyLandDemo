@@ -12,7 +12,6 @@ public:
 private:
     void enter() override;
     void exit() override;
-    std::unique_ptr<PlayerState> handleInput(engine::core::Context&) override;
     std::unique_ptr<PlayerState> update(float deltaTime, engine::core::Context&) override;
 };
 

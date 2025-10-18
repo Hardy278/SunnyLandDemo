@@ -23,28 +23,6 @@ void JumpState::enter() {
 void JumpState::exit() {
 }
 
-std::unique_ptr<PlayerState> JumpState::handleInput(engine::core::Context& context) {
-    auto inputManager = context.getInputManager();
-    auto physicsComponent = m_playerComponent->getPhysicsComponent();
-    auto spriteComponent = m_playerComponent->getSpriteComponent();
-    // 如果按下上下键，且与梯子重合，则切换到 ClimbState
-    if (physicsComponent->hasCollidedLadder() &&
-        (inputManager.isActionDown("move_up") || inputManager.isActionDown("move_down"))) {
-        return std::make_unique<ClimbState>(m_playerComponent);
-    }
-    // 跳跃状态下可以左右移动
-    if (inputManager.isActionDown("move_left")) {
-        if (physicsComponent->m_velocity.x > 0.0f) physicsComponent->m_velocity.x = 0.0f;
-        physicsComponent->addForce({-m_playerComponent->getMoveForce(), 0.0f});
-        spriteComponent->setFlipped(true);
-    } else if (inputManager.isActionDown("move_right")) {
-        if (physicsComponent->m_velocity.x < 0.0f) physicsComponent->m_velocity.x = 0.0f;
-        physicsComponent->addForce({m_playerComponent->getMoveForce(), 0.0f});
-        spriteComponent->setFlipped(false);
-    }
-    return nullptr;
-}
-
 std::unique_ptr<PlayerState> JumpState::update(float, engine::core::Context&) {
     // 限制最大速度(水平方向)
     auto physicsComponent = m_playerComponent->getPhysicsComponent();
@@ -54,6 +32,49 @@ std::unique_ptr<PlayerState> JumpState::update(float, engine::core::Context&) {
     if (physicsComponent->m_velocity.y >= 0.0f) {
         return std::make_unique<FallState>(m_playerComponent);
     }
+    return nullptr;
+}
+
+
+std::unique_ptr<PlayerState> JumpState::moveLeft() {
+    auto physicsComponent = m_playerComponent->getPhysicsComponent();
+    auto spriteComponent = m_playerComponent->getSpriteComponent();
+    // 如果当前速度是向右的，则先减速到0 (增强操控手感)
+    if (physicsComponent->m_velocity.x > 0.0f) physicsComponent->m_velocity.x = 0.0f;
+    physicsComponent->addForce({-m_playerComponent->getMoveForce(), 0.0f});
+    spriteComponent->setFlipped(true);
+
+    return nullptr;
+}
+
+std::unique_ptr<PlayerState> JumpState::moveRight() {
+    auto physicsComponent = m_playerComponent->getPhysicsComponent();
+    auto spriteComponent = m_playerComponent->getSpriteComponent();
+    // 如果当前速度是向左的，则先减速到0 (增强操控手感)
+    if (physicsComponent->m_velocity.x < 0.0f) physicsComponent->m_velocity.x = 0.0f;
+    physicsComponent->addForce({m_playerComponent->getMoveForce(), 0.0f});
+    spriteComponent->setFlipped(false);
+
+    return nullptr;
+}
+
+std::unique_ptr<PlayerState> JumpState::climbUp() {
+    auto physicsComponent = m_playerComponent->getPhysicsComponent();
+    // 如果与梯子重合，则切换到 ClimbState
+    if (physicsComponent->hasCollidedLadder()){
+        return std::make_unique<ClimbState>(m_playerComponent);
+    }
+
+    return nullptr;
+}
+
+std::unique_ptr<PlayerState> JumpState::climbDown() {
+    auto physicsComponent = m_playerComponent->getPhysicsComponent();
+    // 如果与梯子重合，则切换到 ClimbState
+    if (physicsComponent->hasCollidedLadder()){
+        return std::make_unique<ClimbState>(m_playerComponent);
+    }
+
     return nullptr;
 }
 

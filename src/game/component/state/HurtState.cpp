@@ -26,11 +26,6 @@ void HurtState::enter() {
 void HurtState::exit() {
 }
 
-std::unique_ptr<PlayerState> HurtState::handleInput(engine::core::Context&){
-    // 硬直期不能进行任何操控
-    return nullptr;
-}
-
 std::unique_ptr<PlayerState> HurtState::update(float delta_time, engine::core::Context&){
     m_stunnedTimer += delta_time;
     // --- 两种情况离开受伤（硬直）状态：---

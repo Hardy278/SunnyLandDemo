@@ -69,6 +69,33 @@ bool PlayerComponent::takeDamage(int damage) {
     return true;
 }
 
+
+void PlayerComponent::moveLeft() {
+    auto nextState = m_currentState->moveLeft();
+    if (nextState) setState(std::move(nextState));
+}
+
+void PlayerComponent::moveRight() {
+    auto nextState = m_currentState->moveRight();
+    if (nextState) setState(std::move(nextState));
+}
+
+void PlayerComponent::jump() {
+    auto nextState = m_currentState->jump();
+    if (nextState) setState(std::move(nextState));
+}
+
+void PlayerComponent::climbUp() {
+    auto nextState = m_currentState->climbUp();
+    if (nextState) setState(std::move(nextState));
+}
+
+void PlayerComponent::climbDown() {
+    auto nextState = m_currentState->climbDown();
+    if (nextState) setState(std::move(nextState));
+}
+
+
 void PlayerComponent::setState(std::unique_ptr<state::PlayerState> newState) {
     if (!newState) {
         spdlog::warn("PLAYERCOMPONENT::setState::WARN::尝试设置空的玩家状态！");
@@ -89,10 +116,14 @@ bool PlayerComponent::isOnGround() const {
 
 void PlayerComponent::handleInput(engine::core::Context& context) {
     if (!m_currentState) return;
-    auto nextState = m_currentState->handleInput(context);
-    if (nextState) {
-        setState(std::move(nextState));
-    }
+    auto& inputManager = context.getInputManager();
+
+    if (inputManager.isActionDown("move_left")) moveLeft();
+    else if (inputManager.isActionDown("move_right")) moveRight();
+
+    if (inputManager.isActionPressed("jump")) jump();
+    else if (inputManager.isActionPressed("move_up")) climbUp();
+    else if (inputManager.isActionPressed("move_down")) climbDown();
 }
 
 void PlayerComponent::update(float deltaTime, engine::core::Context& context) {
@@ -102,7 +133,7 @@ void PlayerComponent::update(float deltaTime, engine::core::Context& context) {
     if (!m_physicsComponent->hasCollidedBelow()) {
         m_coyoteTimer += deltaTime;
     } else {    // 如果碰撞到地面，重置 Coyote Timer
-        m_coyoteTimer = 0.0f; 
+        m_coyoteTimer = 0.0f;
     }
 
     auto nextState = m_currentState->update(deltaTime, context);

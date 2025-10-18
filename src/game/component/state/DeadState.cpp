@@ -25,11 +25,6 @@ void DeadState::enter() {
 void DeadState::exit() {
 }
 
-std::unique_ptr<PlayerState> DeadState::handleInput(engine::core::Context&) {
-    // 死亡状态下不处理输入
-    return nullptr;
-}
-
 std::unique_ptr<PlayerState> DeadState::update(float, engine::core::Context&) {
     // 死亡状态下不更新状态
     return nullptr;
