@@ -4,7 +4,7 @@
 
 本项目中的代码和资源均遵循 `CC0` 许可证。
 
-本项目是[《SunnyLand》](https://github.com/WispSnow/SunnyLand)项目的学习代码`（其实就是抄了一遍啦）`，感谢原作者的分享和贡献。`（大大真的好厉害请收下我的膝盖!）`
+本项目是[《SunnyLand》](https://github.com/WispSnow/SunnyLand)项目的学习代码
 
 原作者在Bilibili上也有相关视频教程，欢迎关注和观看：
 
@@ -43,8 +43,5 @@ SunnyLandDemo是一个基于SDL库的2D平台游戏项目，使用C++语言编�
    - glm
    - spdlog
    - nlohmann_json
-3. 游戏在`CMakeLists.txt`中直接设置了vcpkg的路径为编写者的本地路径`（嘻嘻，其实是我懒）`，如果你使用路径和游戏的不一样，请自行修改`CMakeLists.txt`中的`set(VCPKG_ROOT_DIR "你的vcpkg路径")`。
+3. 游戏在`CMakeLists.txt`中直接设置了vcpkg的路径为编写者的本地路径，如果你使用路径和游戏的不一样，请自行修改`CMakeLists.txt`中的`set(VCPKG_ROOT_DIR "你的vcpkg路径")`。
 
-## 联系方式
-
-如有任何问题或建议，请不要联系我。`（因为我也不懂）`
